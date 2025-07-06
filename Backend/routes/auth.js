@@ -1,7 +1,7 @@
 const { Router } = require('express');
 const router = Router();
 const jwt = require('jsonwebtoken');
-const secret = "$uperMan@123";
+const secret = process.env.JWT_SECRET;
 
 router.get('/status', (req, res) => {
    
