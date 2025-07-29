@@ -176,21 +176,29 @@ const Login = () => {
     e.preventDefault();
     setLoading(true);
 
-    try {
-      const response = await fetch('http://localhost:8000/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password, user_type }),
-      });
-
+     try {
+    //   const response = await fetch('http://localhost:8000/login', {
+    //     method: 'POST',
+    //     headers: {
+    //       'Content-Type': 'application/json',
+    //     },
+    //     body: JSON.stringify({ email, password, user_type }),
+    //   });
+    const response = await fetch('http://localhost:8000/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include', // 🔥 This is required to store cookies!
+      body: JSON.stringify({ email, password, user_type }),
+    });
+    
       const data = await response.json();
       if (response.ok) {
         console.log('Login successful:', data);
 
         if (typeof window !== 'undefined') {
-          localStorage.setItem('token', data.accessToken); // Ensure correct key
+          //localStorage.setItem('token', data.accessToken); // Ensure correct key
           console.log("Type of window ", typeof window);
         }
         if (data.user_type === 'customer') {

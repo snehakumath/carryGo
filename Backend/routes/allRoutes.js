@@ -8,11 +8,12 @@ const multer = require('multer');
 const path = require('path');
 const Vehicle=require('../models/vehicle');
 const Payment=require('../models/payment');
+const Feedback=require('../models/feedback');
+const Booking=require('../models/booking');
 
 
 // Get profile data
 router.get('/profile', async (req, res) => {
-  console.log("Profile route");
     const token = req.cookies?.accessToken || req.headers.authorization?.split(" ")[1];
 
     if (!token) {
@@ -141,7 +142,7 @@ router.post("/vehicles", async (req, res) => {
     } = req.body;
      
      // Debugging log
-     console.log("Received Data:", req.body);
+    // console.log("Received Data:", req.body);
     // Check required fields
     if (!vehicle_id || !email || !vehicle_type || !model_make || !registration_number || !engine_number || !fuel_type || !capacity || !length || !height) {
       return res.status(400).json({ message: "Please provide all required fields" });
@@ -234,5 +235,40 @@ router.post('/notifications/markAsRead', async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
+
+// GET average rating and success rate of a transporter
+router.get("/transporter/stats/:email", async (req, res) => {
+  const email = req.params.email;
+  console.log("/stats-",email);
+
+  try {
+    const transporter = await User.findOne({ email, user_type: "transporter" });
+    if (!transporter) {
+      return res.status(404).json({ message: "Transporter not found" });
+    }
+
+    const totalBookings = await Booking.countDocuments({
+      transporter_email: transporter._id,
+    });
+
+    const successfulBookings = await Booking.countDocuments({
+      transporter_email: transporter._id,
+      $or: [{ status: "Completed" }, { order_completed: true }],
+    });
+    const feedbacks = await Feedback.find({ transporter_email: email });
+    const avgRating =
+      feedbacks.length > 0
+        ? feedbacks.reduce((acc, f) => acc + f.rating, 0) / feedbacks.length
+        : 0;
+    return res.status(200).json({
+      avgRating: avgRating.toFixed(1),
+      successRate: totalBookings > 0 ? ((successfulBookings / totalBookings) * 100).toFixed(0) : 0,
+    });
+  } catch (error) {
+    console.error("Error in /stats/:email", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
 
 module.exports = router;

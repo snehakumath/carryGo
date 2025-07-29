@@ -16,32 +16,49 @@ const BookingForm = () => {
     name: "",
     phone: "",
     email: "",
+    shareTruck: false,
   });
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
   const [fare, setFare] = useState(null);
   const [distance, setDistance] = useState(null);
   const [showSuccessGif, setShowSuccessGif] = useState(false);
 
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (!token) return;
+  // useEffect(() => {
+  //   const token = localStorage.getItem("token");
+  //   if (!token) return;
 
-    fetch("/auth/status", {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      credentials: "include",
-    })
-      .then((res) => res.ok ? res.json() : Promise.reject())
-      .then((data) => {
-        setIsLoggedIn(data.loggedIn);
-        setUser(data.user);
+  //   fetch("/auth/status", {
+  //     method: "GET",
+  //     headers: {
+  //       "Content-Type": "application/json",
+  //       Authorization: `Bearer ${token}`,
+  //     },
+  //     credentials: "include",
+  //   })
+  //     .then((res) => res.ok ? res.json() : Promise.reject())
+  //     .then((data) => {
+  //       setIsLoggedIn(data.loggedIn);
+  //       setUser(data.user);
+  //     })
+  //     .catch(() => setIsLoggedIn(false));
+  // }, []);
+
+   useEffect(() => {
+      setLoading(true); // Optional
+      fetch("http://localhost:8000/auth/status", {
+        method: "GET",
+        credentials: 'include',
       })
-      .catch(() => setIsLoggedIn(false));
-  }, []);
+        .then((res) => res.ok ? res.json() : Promise.reject())
+        .then((data) => {
+          setIsLoggedIn(data.loggedIn);
+          setUser(data.user);
+        })
+        .catch(() => setIsLoggedIn(false))
+        .finally(() => setLoading(false));
+    }, []);
 
   const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
   const nextStep = () => validateStep() ? (step === 3 && calculateFare(), setStep(step + 1)) : alert("Please fill in all required fields!");
@@ -101,7 +118,8 @@ const BookingForm = () => {
     }
 
     try {
-      const response = await axios.post("/booking/process", formData);
+      const response = await axios.post(`http://localhost:8000/booking/process`, formData);
+     // console.log("REs",response);
       if (response.status === 201) {
         setShowSuccessGif(true);
         setTimeout(() => {
@@ -161,13 +179,22 @@ const BookingForm = () => {
         <div>
           <h2 className="text-xl font-semibold mb-4">Step 4: Truck Details</h2>
           <select name="truckType" value={formData.truckType} onChange={handleChange} className="w-full border px-4 py-2 rounded mb-3 bg-white">
-            <option value="">Select Truck Type</option>
-            <option value="Small Truck">Small Truck</option>
-            <option value="Medium Truck">Medium Truck</option>
-            <option value="Large Truck">Large Truck</option>
-            <option value="Container Truck">Container Truck</option>
-            <option value="Flatbed Truck">Flatbed Truck</option>
+          <option value="Mini Truck">Mini Truck (600kg)</option>
+          <option value="Pickup Truck">Pickup Truck (1.5T)</option>
+          <option value="14ft Truck">14ft Truck (3.5T)</option>
+          <option value="Container Truck">20ft Container (6T)</option>
+          <option value="Flatbed Truck">Flatbed Truck (Variable)</option>
           </select>
+          <label className="flex items-center gap-2 mt-2">
+      <input
+        type="checkbox"
+        name="shareTruck"
+        checked={formData.shareTruck}
+        onChange={(e) => setFormData({ ...formData, shareTruck: e.target.checked })}
+        className="h-4 w-4"
+      />
+      <span className="text-gray-700">Share this truck with others to lower cost (if available)</span>
+    </label>
         </div>
       )}
 

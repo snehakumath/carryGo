@@ -7,8 +7,8 @@ const feedbackSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Order',
     required: true,
-    unique: true  // Each order gets one feedback
-  },
+    // unique: true ❌ remove this
+  },  
   customerId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Customer',

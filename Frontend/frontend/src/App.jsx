@@ -56,6 +56,11 @@ import Payment from "./customer/components/Payment";
 import ProtectedRoute from "./customer/components/ProtectedRoute";
 import Notification from "./customer/shared/Notification";
 import { ApiProvider } from "./context/ApiContext";
+import AdminLogin from "./admin/AdminLogin";
+import AdminSignup from "./admin/AdminSignup";
+import AdminDashboard from "./admin/AdminDashboard";
+import AdminProtectedRoute from "./admin/pages/ProtectedRoute";
+
 //import AdminDashboard from "./admin/AdminDashboard";
 
 function App() {
@@ -90,9 +95,21 @@ function App() {
         <Route element={<ProtectedRoute />}>
           <Route path="/owner/*" element={<OwnerDashboard />} />
         </Route>
-        {/* <Route element={<ProtectedRoute />}>
-          <Route path="/admin/*" element={<AdminDashboard />} />
-        </Route> */}
+       {/* Admin Auth Routes */}
+<Route path="/admin-login" element={<AdminLogin />} />
+<Route path="/admin-signup" element={<AdminSignup />} />
+
+{/* Admin Protected Routes */}
+<Route path="/admin/*" element={
+  <AdminProtectedRoute >
+    <AdminDashboard />
+  </AdminProtectedRoute>
+} />
+
+{/* <Route element={<AdminProtectedRoute />}>
+  <Route path="/admin/*" element={<AdminDashboard />} />
+</Route> */}
+
       </Routes>
     </Router>
     </ApiProvider>

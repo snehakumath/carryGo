@@ -72,6 +72,7 @@ const bookingRoutes = require('./routes/booking');
 const paymentRoutes = require('./routes/payment');
 const biddingRoutes = require("./routes/bidding");
 const feedbackRoutes = require('./routes/feedback');
+const  adminRotes=require('./routes/adminRoutes');
 
 const http = require("http");
 const { initializeSocket } = require("./routes/socketIo");
@@ -107,6 +108,7 @@ app.use('/booking', bookingRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use("/api/bids", biddingRoutes);
 app.use("/api/feedback", feedbackRoutes);
+app.use('/api/admin',adminRotes);
 
 app.use('/', userRoute);
 

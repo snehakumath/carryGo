@@ -7,8 +7,8 @@ const {createTokenForUser,validateToken}=require('../services/authentication');
 const router = Router();
 
 // Secrets for tokens
-const accessTokenSecret = '$uperMan@123'; // Replace with your secret
-const refreshTokenSecret = '$uperMan@124';
+const accessTokenSecret = process.env.JWT_SECRET; // Replace with your secret
+const refreshTokenSecret =  process.env.JWT_SECRET;;
 const refreshTokens = [];
 
 // Serve login and signup pages
@@ -20,22 +20,31 @@ router.get('/signup', (req, res) => {
   return res.sendFile(path.join(__dirname, '../../Frontend/frontend/dist/index.html'));
 });
 
-
-
-
 router.post('/login', async (req, res) => {
   const { user_type, email, password } = req.body;
 
   try {
-    // Authenticate the user and generate an access token
+    // Find the user first
+    const user = await User.findOne({ email, user_type });
+
+    if (!user) {
+      return res.status(401).json({ success: false, message: "Invalid email or user type" });
+    }
+
+    // ✅ Check if the user is suspended
+    if (user.status === "Suspended") {
+      return res.status(403).json({ success: false, message: "Your account has been suspended. Please contact support." });
+    }
+
+    // Match password and generate token
     const accessToken = await User.matchPasswordAndGenerateToken(user_type, email, password);
 
-    // Create a refresh token using `createTokenForUser`
+    // Generate refresh token
     const refreshToken = createTokenForUser({ email, user_type });
-    
-    // Set both tokens in cookies (HTTP-Only for security)
-    res.cookie('accessToken', accessToken, { httpOnly: true, maxAge: 3600000 }); // 1 hour
-    res.cookie('refreshToken', refreshToken, { httpOnly: true, maxAge: 7 * 24 * 60 * 60 * 1000 }); // 7 days
+
+    // Set tokens in cookies
+    res.cookie('accessToken', accessToken, { httpOnly: true, maxAge: 3600000 });
+    res.cookie('refreshToken', refreshToken, { httpOnly: true, maxAge: 7 * 24 * 60 * 60 * 1000 });
 
     return res.status(200).json({
       success: true,
@@ -44,13 +53,16 @@ router.post('/login', async (req, res) => {
       refreshToken,
       user_type,
     });
+
   } catch (error) {
     console.error('Login error:', error.message);
     return res.status(401).json({ success: false, message: error.message });
   }
 });
 
+
 router.post('/signup', async (req, res) => {
+    console.log("/signup");
   try {
       const { user_type, name, phone, email, password } = req.body;
       const user = await User.create({ user_type, name, phone, email, password });
@@ -71,7 +83,9 @@ router.post('/refresh-token', (req, res) => {
 
   try {
       // Validate the refresh token
-      const decoded = jwt.verify(refreshToken, refreshSecretKey);
+      //const decoded = jwt.verify(refreshToken, refreshSecretKey);
+      const decoded = jwt.verify(refreshToken, refreshTokenSecret);
+
 
       // Create a new access token
       const newAccessToken = jwt.sign(
@@ -97,15 +111,7 @@ router.post('/refresh-token', (req, res) => {
 
 // Logout route
 router.post('/logout', (req, res) => {
-  // const { refreshToken } = req.body;
-
-  // const index = refreshTokens.indexOf(refreshToken);
-  // if (index > -1) {
-  //   refreshTokens.splice(index, 1);
-  // }
-
-  // res.clearCookie('token');
-  // return res.json({ success: true, message: 'Logged out successfully' });
+ console.log("Logout");
 
   res.clearCookie('accessToken');
   res.clearCookie('refreshToken');

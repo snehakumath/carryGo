@@ -14,6 +14,12 @@ const Profile = () => {
   });
   const [profilePic, setProfilePic] = useState(null);
   const [preview, setPreview] = useState("");
+  const [stats, setStats] = useState({
+    totalResponses: 0,
+    acceptedOrders: 0,
+    successfulOrders: 0
+  });
+  
 
   useEffect(() => {
     axios
@@ -33,22 +39,50 @@ const Profile = () => {
 
           // Fetch orders for this user
           fetchOrders(userData.email);
+          fetchStats(userData.email);
+
         }
       })
       .catch((err) => console.error("Error fetching profile:", err));
   }, []);
 
-  const fetchOrders = async (email) => {
-    console.log("Email:-",email);
-    try {
-      const response = await axios.get(`/booking/delivered-orders/${email}`);
-      console.log("Fetched orders response:", response.data.completedBookings);
-      setOrders(response.data.completedBookings);
- // since it's just an array      
-    } catch (err) {
-      console.error("Error fetching orders:", err);
-    }
+  // const fetchOrders = async (email) => {
+  //   console.log("Emails..:-",email);
+  //   try {
+  //     const response = await axios.get(`/booking/delivered-orders/${email}`);
+  //     console.log("Fetched orders response:", response.data.completedBookings);
+  //     setOrders(response.data.completedBookings);
+  //     // since it's just an array      
+  //   } catch (err) {
+  //     console.error("Error fetching orders:", err);
+  //   }
+  // };
+  
+  const fetchOrders = (email) => {
+    axios
+      .get(`http://localhost:8080/booking/delivered-orders/${email}`, { withCredentials: true })
+      .then((response) => {
+        console.log("Fetched orders full response:", response);
+        console.log("Fetched orders data:", response.data);
+        setOrders(response.data.completedBookings);
+      })
+      .catch((error) => {
+        console.error("Error fetching orders:", error);
+      });
   };
+  
+  
+  const fetchStats = async (email) => {
+    console.log("fetchStats",email);
+    try {
+      const res = await axios.get(`/booking/stats/${email}`);
+      console.log("response",res);
+      setStats(res.data);
+    } catch (err) {
+      console.error("Error fetching stats:", err);
+    } 
+  };
+  
   
 
   const handleChange = (e) => {
@@ -83,12 +117,21 @@ const Profile = () => {
     }
   };
 
+  // const handleLogout = () => {
+  //   axios.post("/logout", {}, { withCredentials: true }).then(() => {
+  //     window.location.href = "/login";
+  //   });
+  // };
+  
   const handleLogout = () => {
-    axios.post("/logout", {}, { withCredentials: true }).then(() => {
-      localStorage.removeItem("token");
-      window.location.href = "/login";
-    });
-  };
+      axios.post("http://localhost:8000/logout", {}, { withCredentials: true })
+        .then(() => {
+          window.location.href = "/login"; // redirect to login
+        })
+        .catch((err) => {
+          console.error("Logout failed:", err);
+        });
+    };
 
   if (!user) return <div className="text-white text-center mt-10">Loading...</div>;
 
@@ -96,6 +139,7 @@ const Profile = () => {
     <div className="min-h-screen bg-[#f5f5f5] text-white flex flex-col md:flex-row p-6 gap-6">
       {/* Sidebar - Profile Info */}
       <div className="w-full md:w-1/3 bg-[#2c2c2e] p-6 rounded-2xl shadow-lg border border-gray-600">
+      <div>
         <div className="flex justify-center items-center flex-col mb-6">
           <img
             src={preview}
@@ -136,6 +180,7 @@ const Profile = () => {
                 className="w-full px-3 py-2 bg-[#3a3a3c] border border-gray-500 rounded-md text-white"
               />
             </div>
+
             <button
               type="submit"
               className="w-full bg-[#f5f5f5] text-black font-semibold py-2 rounded-md hover:bg-gray-300 transition"
@@ -153,7 +198,16 @@ const Profile = () => {
             ))}
           </div>
         )}
-
+        {/* Stats always shown */}
+        <div className="mb-4 mt-6 border-t border-gray-400 pt-4">
+          <p className="text-sm font-semibold">📦 Total Responses</p>
+          <p>{stats.totalResponses}</p>
+          <p className="text-sm font-semibold mt-2">✅ Accepted Orders</p>
+          <p>{stats.acceptedOrders}</p>
+          <p className="text-sm font-semibold mt-2">🏁 Successful Deliveries</p>
+          <p>{stats.successfulOrders}</p>
+        </div>
+      </div>
         <div className="flex justify-between mt-6">
           <button
             onClick={() => setIsEditing(!isEditing)}

@@ -117,6 +117,48 @@ const Booking = () => {
         alert(`Error: ${error.response.data.message || "Failed to place bid"}`);
       }
     }
+  };const handleCancelOrder = async (orderId) => {
+    try {
+      const response = await axios.post(
+        "http://localhost:8000/booking/cancel-booking",
+        {
+          booking_id: orderId,
+          transporter_email: transporterEmail,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+          withCredentials: true, // ensure cookies are sent if using cookies
+        }
+      );
+  
+      alert("Order cancelled successfully!");
+  
+      // 🚨 Auto-logout if transporter is suspended
+      if (response.data.logout) {
+        alert("⚠️ Your account has been suspended due to multiple cancellations.");
+        localStorage.removeItem("token"); // Clear JWT
+        window.location.href = "/login";  // Redirect to login
+        return; // Stop further execution
+      }
+  
+      // 🔄 Refresh orders after cancellation
+      const updatedOrders = await axios.get(
+        `http://localhost:8000/booking/orders?transporterEmail=${transporterEmail}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+      setAcceptedOrders(updatedOrders.data.acceptedOrders || []);
+  
+    } catch (error) {
+      console.error("Error cancelling order:", error);
+      alert("Failed to cancel order.");
+    }
   };
   
   const handleAssignTruck = async (orderId, selectedTruckId) => {
@@ -315,6 +357,13 @@ const Booking = () => {
               >
                 Mark as Completed
               </button>
+              <button
+                onClick={() => handleCancelOrder(order._id)}
+                className="bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-lg mt-2 w-full transition"
+              >
+                ❌ Cancel Order
+              </button>
+
             </div>
           ))
         ) : (
@@ -390,176 +439,6 @@ const Booking = () => {
 )}
 
   </div>
-  
-  
-//     <div className="min-h-screen bg-gray-100 p-6">
-
-//       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-//         {/* Available Orders */}
-//         <div>
-//           <h3 className="text-lg font-semibold">Available Orders</h3>
-//           {availableOrders.length > 0 ? (
-//             availableOrders.map(order => (
-//               <div key={order._id} className="bg-white p-4 shadow-md rounded-lg">
-//                 <p><strong>Order #{order._id}</strong></p>
-//                 <p>Pickup: {order.pickup_loc}</p>
-//                 <p>Dropoff: {order.dropoff_loc}</p>
-//                 <input
-//                   type="number"
-//                   placeholder="Enter bid amount (₹)"
-//                   className="border p-2 rounded w-full"
-//                   value={bidAmounts[order._id] || ""}
-//                   onChange={(e) => setBidAmounts({ ...bidAmounts, [order._id]: e.target.value })}
-//                 />
-//                 <button
-//                   onClick={() => handlePlaceBid(order._id)}
-//                   className="bg-blue-500 text-white py-2 px-4 rounded-lg mt-2"
-//                 >
-//                   Place Bid
-//                 </button>
-//               </div>
-//             ))
-//           ) : (
-//             <p className="text-gray-500">No available orders</p>
-//           )}
-//         </div>
-
-//         {/* Placed Bids */}
-//         <div>
-//           <h3 className="text-lg font-semibold">Placed Bids</h3>
-//           {placedBids.length > 0 ? (
-//             placedBids.map(order => (
-//               <div key={order._id} className="bg-white p-4 shadow-md rounded-lg">
-//                 <p><strong>Order #{order._id}</strong></p>
-//                 <p>Customer: {order.email}</p>
-//                 <p>Pickup: {order.pickup_loc}</p>
-//                 <p>Dropoff: {order.dropoff_loc}</p>
-//                 {/* {console.log("BIDS for Order", order._id, order.bids)}
-//                 {console.log("Transporter Email:", transporterEmail)}
-
-//                 <p>
-//                 Bid Amount: ₹
-//                 {
-//                   order.bids?.find(
-//                     bid => bid.transporter_email?.toLowerCase() === transporterEmail?.toLowerCase()
-//                   )?.bid_amount || "N/A"
-//                 }
-//               </p> */}
-
-
-
-//               </div>
-//             ))
-//           ) : (
-//             <p className="text-gray-500">No placed bids</p>
-//           )}
-//         </div>
-
-//         {/* Accepted Orders */}
-
-// <div>
-//   <h3 className="text-lg font-semibold">Accepted Orders</h3>
-//   {acceptedOrders.length > 0 ? (
-//     acceptedOrders.map(order => (
-//       <div key={order._id} className="bg-white p-4 shadow-md rounded-lg mb-4">
-//         <p><strong>Order #{order._id}</strong></p>
-//         <p>Pickup: {order.pickup_loc}</p>
-//         <p>Dropoff: {order.dropoff_loc}</p>
-//         <p>
-//           Accepted Bid: ₹
-//           {order.bids && order.bids.length > 0
-//             ? order.bids.find(bid => bid.status === "Accepted")?.bid_amount || "N/A"
-//             : "N/A"}
-//         </p>
-//         {/* Done button to confirm assignment */}
-//              {/* Dropdown to select truck */}
-//         {order.vehicle_id ? (
-//   <div className="mt-3 flex gap-2">
-//     <button className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
-//       Chat with Customer
-//     </button>
-//     <button className="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600" 
-//     onClick={(e)=>{handleCompletedOrder(order._id)}}>
-//       Complete Order
-//     </button>
-//   </div>
-// ) : (
-//   <div>
-//       <label className="block mt-2 text-sm font-medium">Assign Truck:</label>
-//         <select
-//           className="border mt-1 p-2 w-full rounded"
-//           value={order.selectedTruck || ""}
-//           onChange={(e) => {
-//             const selectedTruckId = e.target.value;
-//             setAcceptedOrders(prevOrders =>
-//               prevOrders.map(o =>
-//                 o._id === order._id ? { ...o, selectedTruck: selectedTruckId } : o
-//               )
-//             );
-//           }}
-//         >
-//           <option value="">Select a Truck</option>
-//           {availableTrucks.map(truck => (
-//             <option key={truck.vehicle_id} value={truck.vehicle_id}>
-//               {truck.vehicle_type} - {truck.vehicle_id}
-//             </option>
-//           ))}
-//         </select>
-//         <button
-//     className="mt-3 bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
-//     onClick={() => handleAssignTruck(order._id, order.selectedTruck)}
-//   >
-//     Done
-//   </button>
-//     </div>
-// )}
-//  </div>
-//     ))
-//   ) : (
-//     <p className="text-gray-500">No accepted orders</p>
-//   )}
-// </div>
-
-//       </div>
-//        {/* Truck Information Section */}
-//      <h2 className="text-2xl font-semibold mt-8 mb-4">Your Trucks</h2>
-//      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-//          {/* Available Trucks */}
-//          <div className="bg-white p-4 shadow-md rounded-lg">
-//           <h3 className="text-lg font-semibold text-green-600">Available Trucks</h3>
-//           {availableTrucks.length > 0 ? (
-//              availableTrucks.map(truck => (
-//               <p key={truck.vehicle_id}>
-//                 {truck.vehicle_type} - <strong>{truck.vehicle_id}</strong>
-//                </p>
-//              ))
-//            ) : (
-//              <p className="text-gray-500">No available trucks.</p>
-//            )}
-//          </div>
-//          {/* Busy Trucks */}
-//          <div className="bg-white p-4 shadow-md rounded-lg">
-//           <h3 className="text-lg font-semibold text-red-600">Busy Trucks</h3>
-//            {busyTrucks.length > 0 ? (
-//              busyTrucks.map(truck => (
-//               <div key={truck.vehicle_id} className="relative border-t pt-2 mt-2">
-//                 <button 
-//                   onClick={() => markAsAvailable(truck.vehicle_id)} 
-//                    className="absolute top-2 right-2 text-red-600 font-bold"
-//                  >
-//                    ❌
-//                  </button>
-//                  <p><strong>Truck:</strong> {truck.vehicle_type} - {truck.vehicle_id}</p>
-//                  <p><strong>Pickup:</strong> {truck.pickup_loc || "N/A"}</p>
-//                  <p><strong>Dropoff:</strong> {truck.dropoff_loc || "N/A"}</p>
-//                </div>
-//              ))
-//            ) : (
-//              <p className="text-gray-500">No busy trucks.</p>
-//            )}
-//          </div>
-//        </div>
-//     </div>
   );
 };
 

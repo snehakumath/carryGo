@@ -43,6 +43,7 @@ router.post("/process", async (req, res) => {
     name,
     phone,
     email,
+    is_shared,
   } = req.body;
 
   try {
@@ -57,14 +58,15 @@ router.post("/process", async (req, res) => {
       name,
       phone,
       email,
+      is_shared,
     });
-
+ // console.log("Booking",newBooking);
     await newBooking.save();
     await sendNotificationToTransporters(
       `New booking from ${pickup_loc} to ${dropoff_loc}`,
       newBooking._id
     );
-    
+    //console.log("Saved");
     // Respond with success message
     res.status(201).json({
       message: "Booking successfully created!",
@@ -84,7 +86,7 @@ router.get("/goods", async (req, res) => {
   try {
     const goods = await Booking.find({}, "goods_type pickup_loc dropoff_loc email transporter_email status vehicle_id pickup_date bid_status")
     .populate('transporter_email', 'email'); // Fetch relevant fields
-    console.log("goods details",goods);
+    // console.log("goods details",goods);
     res.json(goods);
   } catch (error) {
     res.status(500).json({ message: "Server error", error });
@@ -150,68 +152,6 @@ router.get("/orders", async (req, res) => {
     return res.status(500).json({ error: "Internal Server Error" });
   }
 });
-
-
-// router.get("/orders", async (req, res) => {
-//   console.log("Helloo");
-//   try {
-//     const transporterEmail = req.query.transporterEmail;
-//     const today = new Date();
-//     today.setHours(0, 0, 0, 0);
-
-//     // 🔍 Find transporter by email to get their _id
-//     // const transporter = await User.findOne({ email: transporterEmail }).lean();
-//     const transporterId = Booking._id;
-
-//     // 🚚 Get bookings
-//     const [eligibleBookings, acceptedBookings] = await Promise.all([
-//       Booking.find({
-//         pickup_date: { $gte: today },
-//         status: { $in: ["Accepted", "Pending"] },
-//         bid_status: { $in: ["Pending", "Bidding"] },
-//       }).lean(),
-//       Booking.find({
-//         pickup_date: { $gte: today },
-//         status: "Accepted",
-//         bid_status: "Customer Accepted",
-//         transporter_email: transporterId, // ✅ Correct ID now
-//       }).lean()
-//     ]);
-//     const transporter = await User.findOne({ email: transporterEmail }).lean();
-//     if (!transporter) return res.status(404).json({ error: "Transporter not found" });
-    
-//     const transporterBids = await Bidding.find({
-//       transporter: transporter._id,
-//     }).lean();
-    
-
-//     const transporterBidIds = new Set(
-//       transporterBids.map((bid) => bid.booking_id.toString())
-//     );
-
-//     const placedBids = [];
-//     const availableOrders = [];
-
-//     for (const booking of eligibleBookings) {
-//       const id = booking._id.toString();
-//       if (transporterBidIds.has(id)) {
-//         placedBids.push(booking);
-//       } else {
-//         availableOrders.push(booking);
-//       }
-//     }
-//     console.log("Accept Bookings",acceptedBookings);
-//     return res.json({
-//       availableOrders,
-//       placedBids,
-//       acceptedOrders: acceptedBookings,
-//     });
-
-//   } catch (error) {
-//     console.error("❌ Error in /orders:", error);
-//     return res.status(500).json({ error: "Internal Server Error" });
-//   }
-// });
 
 //fetch transporter and vehicle detail for customer
 router.get('/:order_id', async (req, res) => {
@@ -284,50 +224,6 @@ router.get('/transporter/:email', async (req, res) => {
     res.status(500).json({ message: 'Server Error' });
   }
 });
-// ✅ Accept Order & Assign Vehicle
-
-
-// router.post('/orders/accept', async (req, res) => {
-//   const { orderId, transporterEmail, vehicleId, customerEmail } = req.body;
-
-//   if (!orderId || !transporterEmail || !vehicleId || !customerEmail) {
-//     return res.status(400).json({ error: 'Missing required fields.' });
-//   }
-
-//   try {
-//     // Find Booking & Update
-//     const booking = await Booking.findOneAndUpdate(
-//       { orderId },
-//       {
-//         transporterEmail,
-//         vehicleId,
-//         status: 'Assigned',
-//       },
-//       { new: true }
-//     );
-
-//     if (!booking) {
-//       return res.status(404).json({ error: 'Booking not found.' });
-//     }
-
-//     // Update Vehicle Status to Busy
-//     await Vehicle.findByIdAndUpdate(vehicleId, { availabilityStatus: false });
-
-//     // Send notification to the customer
-//     await sendNotificationToCustomer(
-//       customerEmail,
-//       orderId,
-//       `Your booking has been accepted by ${transporterEmail} and a vehicle is assigned.`
-//     );
-
-//     res.json({ message: 'Order accepted, vehicle assigned.', booking });
-//   } catch (error) {
-//     console.error('Error accepting order:', error);
-//     res.status(500).json({ error: 'Internal Server Error.' });
-//   }
-// });
-
-
 
 // ✅ Reject Order
 router.post("/orders/reject", async (req, res) => {
@@ -632,7 +528,7 @@ router.post("/complete-order", async (req, res) => {
 // routes/orders.js or similar
 router.get("/view-orders/:email", async (req, res) => {
   const { email } = req.params;
-  console.log("Fetching completed orders for:", email);
+  //console.log("Fetching completed orders for:", email);
 
   try {
     const completedBookings = await Booking.find({
@@ -642,7 +538,7 @@ router.get("/view-orders/:email", async (req, res) => {
       .populate("vehicle_id")
       .populate("transporter_email");
 
-   // console.log("Complete bookings:", completedBookings);
+  // console.log("Complete bookings:", completedBookings);
 
     // ✅ FIX: Wrap in an object with `success` and `orders`
     res.status(200).json({
@@ -689,6 +585,45 @@ router.get("/delivered-orders/:email", async (req, res) => {
   }
 });
 
+router.get("/stats/:email", async (req, res) => {
+  const email = req.params.email;
+
+  try {
+    // Step 1: Find transporter by email
+    const transporter = await User.findOne({ email: email, user_type: "transporter" });
+
+    if (!transporter) {
+      return res.status(404).json({ error: "Transporter not found with this email" });
+    }
+   console.log(",,,",transporter,email);
+    // Step 2: Use transporter._id for booking stats
+    const totalResponses = await Booking.countDocuments({
+      transporter_email: transporter._id,
+    });
+
+    const acceptedOrders = await Booking.countDocuments({
+      transporter_email: transporter._id,
+      status: "Accepted",
+    });
+
+    const successfulOrders = await Booking.countDocuments({
+      transporter_email: transporter._id,
+      $or: [{ status: "Completed" }, { order_completed: true }],
+    });
+  console.log("res", totalResponses,
+    acceptedOrders,
+    successfulOrders,);
+    res.status(200).json({
+      totalResponses,
+      acceptedOrders,
+      successfulOrders,
+    });
+  } catch (error) {
+    console.error("Error fetching booking stats:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 cron.schedule('0 0 * * *', async () => {
   try {
       const today = new Date();
@@ -696,6 +631,51 @@ cron.schedule('0 0 * * *', async () => {
       console.log("✅ Trucks updated automatically based on pickup date.");
   } catch (err) {
       console.error("❌ Error in cron job:", err);
+  }
+});
+
+// Cancel booking + check for suspension
+router.post('/cancel-booking', async (req, res) => {
+  const { booking_id, transporter_email } = req.body;
+
+  try {
+    // 1. Find transporter
+    const transporter = await User.findOne({ email: transporter_email, user_type: "transporter" });
+    if (!transporter) return res.status(404).json({ message: "Transporter not found" });
+
+    // 2. Cancel the booking
+    const booking = await Booking.findByIdAndUpdate(
+      booking_id,
+      { status: "Cancelled" },
+      { new: true }
+    );
+    if (!booking) return res.status(404).json({ message: "Booking not found" });
+
+    // 3. Count cancellations
+    const cancelledCount = await Booking.countDocuments({
+      transporter_email: transporter._id,
+      status: "Cancelled",
+    });
+
+    let logoutUser = false;
+
+    // 4. Suspend if >=3
+    if (cancelledCount >= 3) {
+      await User.updateOne({ _id: transporter._id }, { status: "Suspended" });
+      console.log(`${transporter_email} suspended for ${cancelledCount} cancellations.`);
+      logoutUser = true;
+    }
+
+    return res.json({
+      success: true,
+      message: "Booking cancelled",
+      cancelledCount,
+      logout: logoutUser, // 🔥 return this to frontend
+    });
+
+  } catch (err) {
+    console.error("Cancel error:", err);
+    return res.status(500).json({ error: "Failed to cancel booking" });
   }
 });
 

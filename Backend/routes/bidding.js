@@ -1,79 +1,3 @@
-// // Backend: Express Routes for Bidding System
-// const express = require("express");
-// const router = express.Router();
-// const Bidding = require("../models/bidding");
-// const Booking = require("../models/booking");
-
-// // Place a Bid (Restricted to Transporters Only)
-// router.post("/placeBid", async (req, res) => {
-//     try {
-//         const { booking_id, transporter_email, bid_amount } = req.body;
-        
-//         // Validate input
-//         if (!booking_id || !transporter_email || !bid_amount) {
-//             return res.status(400).json({ message: "All fields are required" });
-//         }
-        
-//         const newBid = new Bidding({ booking_id, transporter_email, bid_amount, status: "Pending" });
-//         await newBid.save();
-        
-//         res.status(201).json({ message: "Bid placed successfully" });
-//     } catch (error) {
-//         res.status(500).json({ message: "Internal Server Error", error: error.message });
-//     }
-// });
-
-// // Get Bids for a Booking
-// router.get("/viewBids/:booking_id", async (req, res) => {
-//     try {
-//         const { booking_id } = req.params;
-        
-//         // Ensure booking exists
-//         const bids = await Bidding.find({ booking_id });
-//         if (bids.length === 0) {
-//             return res.status(404).json({ message: "No bids found for this booking." });
-//         }
-        
-//         res.status(200).json(bids);
-//     } catch (error) {
-//         res.status(500).json({ message: "Internal Server Error", error: error.message });
-//     }
-// });
-
-// // Accept a Bid
-// router.post("/acceptBid/:bid_id", async (req, res) => {
-//     try {
-//         const { bid_id } = req.params;
-//         const bid = await Bidding.findById(bid_id);
-//         if (!bid) {
-//             return res.status(404).json({ message: "Bid not found" });
-//         }
-        
-//         // Reject all other bids for the same booking
-//         await Bidding.updateMany(
-//             { booking_id: bid.booking_id, _id: { $ne: bid_id } },
-//             { $set: { status: "Rejected" } }
-//         );
-        
-//         // Accept the selected bid
-//         bid.status = "Accepted";
-//         await bid.save();
-        
-//         // Update Booking Status
-//         await Booking.updateOne(
-//             { _id: bid.booking_id },
-//             { $set: { status: "Assigned", assigned_transporter: bid.transporter_email } }
-//         );
-        
-//         res.status(200).json({ message: "Bid accepted successfully" });
-//     } catch (error) {
-//         res.status(500).json({ message: "Internal Server Error", error: error.message });
-//     }
-// });
-
-// module.exports = router;
-
-
 const express = require("express");
 const router = express.Router();
 const Bidding = require("../models/bidding");
@@ -120,7 +44,7 @@ router.post("/place-bid", async (req, res) => {
     });
 
     await newBid.save();
-    console.log("New bid", newBid);
+   // console.log("New bid", newBid);
     res.status(201).json({ message: "Bid placed successfully!", newBid });
 
   } catch (error) {
@@ -147,37 +71,41 @@ router.get("/viewBids/:booking_id", async (req, res) => {
   }
 });
 
+
+
 router.post("/customer/accept", async (req, res) => {
   try {
     const { good_id, transporter_email, amount } = req.body;
-    console.log("Route",good_id, transporter_email, amount);
-    // Validate inputs
+
     if (!good_id || !transporter_email || !amount) {
       return res.status(400).json({ error: "Missing required fields" });
     }
 
-    // Step 1: Get transporter _id from email
+    // Step 1: Find transporter by email
     const transporter = await User.findOne({ email: transporter_email });
     if (!transporter) {
       return res.status(404).json({ error: "Transporter not found" });
     }
 
-    const transporterId = transporter._id; // ✅ Correct ObjectId
+    const transporterId = transporter._id;
 
-    // Step 2: Accept this transporter's bid
-    const book = await Booking.updateOne(
-      { _id: good_id },
+    // Step 2: Update booking with accepted transporter and amount
+    const updatedBooking = await Booking.findByIdAndUpdate(
+      good_id,
       {
-        $set: {
-          status: "Accepted",
-          bid_status: "Customer Accepted",
-          transporter_email: transporterId, // 🚫 this is where the problem is
-          final_amount: amount,
-        }
-      }
+        status: "Accepted",
+        bid_status: "Customer Accepted",
+        transporter_email: transporterId, // <-- Save ObjectId, not string
+        final_amount: amount,
+      },
+      { new: true }
     );
 
-    // Step 3: Reject other bids
+    if (!updatedBooking) {
+      return res.status(404).json({ error: "Booking not found" });
+    }
+
+    // Step 3: Reject all other bids for this order
     await Bidding.updateMany(
       {
         booking_id: new mongoose.Types.ObjectId(good_id),
@@ -185,26 +113,14 @@ router.post("/customer/accept", async (req, res) => {
       },
       { $set: { status: "Rejected" } }
     );
-    // Step 4: Update the booking
-    // await Booking.updateOne(
-    //   { _id: good_id },
-    //   {
-    //     $set: {
-    //       status: "Accepted",
-    //       bid_status: "Customer Accepted",
-    //       transporter_email: transporter._id, // Optional, for readability
-    //       final_amount: amount,
-    //     }
-    //   }
-    // );
 
-    return res.status(200).json({ message: "Bid accepted successfully" });
+    res.status(200).json({ message: "Bid accepted successfully" });
+
   } catch (error) {
     console.error("❌ Error accepting bid:", error);
-    return res.status(500).json({ error: "Internal server error" });
+    res.status(500).json({ error: "Internal server error" });
   }
 });
-
 
 router.put("/orders/bid/:orderId", async (req, res) => {
   const { orderId } = req.params;

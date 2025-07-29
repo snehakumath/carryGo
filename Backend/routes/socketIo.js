@@ -117,62 +117,7 @@ const initializeSocket = (server) => {
 };
 
 // Emit notification to all transporters
-// const sendNotificationToTransporters = async (message, orderId) => {
-//     try {
-//         if (!io) {
-//             console.error("⚠️ Socket.io is not initialized");
-//             return;
-//         }
 
-//         const transporters = await User.find({ user_type: "transporter" });
-//         if (transporters.length === 0) {
-//             console.warn("⚠️ No transporters found!");
-//             return;
-//         }
-
-//         // Initialize an array to store notifications to insert
-//         const notificationsToInsert = [];
-
-//         // Loop through all transporters and check for existing notifications
-//         for (let transporter of transporters) {
-//             const existingNotification = await Notification.findOne({
-//                 userId: transporter._id,
-//                 orderId: orderId,
-//                 type: "order",
-//             });
-
-//             // If notification already exists, skip it
-//             if (existingNotification) {
-//                 console.log(`⚠️ Notification already exists for transporter ${transporter._id}`);
-//                 continue;  // Skip if notification already exists
-//             }
-
-//             // If no existing notification, add to the insert list
-//             notificationsToInsert.push({
-//                 userId: transporter._id,
-//                 orderId,
-//                 message,
-//                 type: "order",
-//                 isRead: false,
-//             });
-//         }
-
-//         // Insert new notifications if there are any to insert
-//         if (notificationsToInsert.length > 0) {
-//             const savedNotifications = await Notification.insertMany(notificationsToInsert);
-//             console.log("✅ Notifications saved in DB:", savedNotifications);
-
-//             // Emit notifications to the connected transporters
-//             io.to("transporter-room").emit("newNotification", savedNotifications);
-//             console.log("📢 Notification sent to transporters!");
-//         } else {
-//             console.log("✅ No new notifications to insert.");
-//         }
-
-//     } catch (error) {
-//         console.error("❌ Error sending notification:", error);
-//     }
-// };
 
 const sendNotificationToTransporters = async (message, orderId) => {
     try {

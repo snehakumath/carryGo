@@ -50,18 +50,48 @@ const GoodsTracking = () => {
 
   useEffect(() => {
     if (!selectedGood) return;
+  
     const fetchBids = async () => {
+      console.log("fetchBids hit");
       try {
         const response = await axios.get(`http://localhost:8000/api/bids/received/${selectedGood._id}`);
-
-        console.log("Fetched Bids:", response.data); // Debugging
-        setBids(response.data); // Assuming response is an array
+  
+        const bidsWithStats = await Promise.all(
+          response.data.map(async (bid) => {
+            try {
+              console.log("email",bid.transporter.email);
+              const statsRes = await axios.get(
+                `http://localhost:8000/api/transporter/stats/${bid.transporter.email}`
+              );
+              console.log("stats",statsRes, statsRes.data.avgRating,
+                statsRes.data.successRate);
+              return {
+                ...bid,
+                avgRating: statsRes.data.avgRating,
+                successRate: statsRes.data.successRate,
+              };
+            } catch (err) {
+              console.error(`Error fetching stats for ${bid.transporter.email}`, err);
+              return {
+                ...bid,
+                avgRating: "N/A",
+                successRate: "N/A",
+              };
+            }
+          })
+        );
+  
+        console.log("Fetched Bids with Stats:", bidsWithStats);
+        setBids(bidsWithStats);
       } catch (error) {
         console.error("Error fetching bids:", error);
       }
     };
+  
     fetchBids();
   }, [selectedGood]);
+  
+  
   
   const handlePayment = async (order,bid) => {
     console.log(order);
@@ -212,6 +242,8 @@ const GoodsTracking = () => {
     <div key={bid._id} className="p-2 border-b">
      <p><strong>Transporter:</strong> {bid.transporter?.email}</p>
       <p><strong>Bid Amount:</strong> Rs.{bid.bid_amount || "0"}</p>
+      <p><strong>Avg Rating:</strong> ⭐ {bid.avgRating || "N/A"}</p>
+      <p><strong>Success Rate:</strong> {bid.successRate || 0}%</p>
       
       {/* Show button only if bid not accepted */}
       {selectedGood?.bid_status !== "Customer Accepted" && (
@@ -228,6 +260,8 @@ const GoodsTracking = () => {
     <p><strong>Transporter:</strong> {selectedGood.transporter_email.email}</p>
     <p><strong>Accepted Bid:</strong> Rs.{bid.bid_amount}</p>
     <p><strong>Status:</strong>{selectedGood.status}</p>
+ 
+
     {selectedGood?.status !== "Paid" && (
       <button
         onClick={() => handlePayment(selectedGood,bid)}

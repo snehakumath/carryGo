@@ -27,7 +27,7 @@ const [feedbackForm, setFeedbackForm] = useState({});
       .then((response) => {
         if (response.data.success) {
           const userData = response.data.user;
-          console.log("Response",response);
+         // console.log("Response",response);
           setUser(userData);
           setFormData({
             name: userData.name,
@@ -47,10 +47,13 @@ const [feedbackForm, setFeedbackForm] = useState({});
 
   const fetchOrders = async (email) => {
     try {
-      const response = await axios.get(`/booking/view-orders/${email}`);
+      console.log("email",email);
+      const response = await axios.get(`http://localhost:8000/booking/view-orders/${email}`);
+        console.log("response",response);
       if (Array.isArray(response.data.orders)) {
         setOrders(response.data.orders);
         response.data.orders.forEach(order => fetchFeedbackForOrder(order._id));
+       // console.log("data",response.data.orders );
       } else {
         console.error("Unexpected response format:", response.data);
       }
@@ -61,10 +64,13 @@ const [feedbackForm, setFeedbackForm] = useState({});
   
   const fetchFeedbackForOrder = async (orderId) => {
     try {
-      const res = await axios.get(`/api/feedback/${orderId}`);
-      if (res.data.success && res.data.feedback) {
-        setFeedbacks((prev) => ({ ...prev, [orderId]: res.data.feedback }));
+      console.log("fetch",orderId);
+      const res = await axios.get(`http://localhost:8000/api/feedback/${orderId}`);
+      console.log("REs",res);
+      if (res.data.feedback && res.data.feedback.orderId) {
+        setFeedbacks((prev) => ({ ...prev, [res.data.feedback.orderId]: res.data.feedback }));
       }
+      
     } catch (err) {
       console.error("Error fetching feedback:", err);
     }
@@ -81,7 +87,7 @@ const [feedbackForm, setFeedbackForm] = useState({});
       await axios.post("http://localhost:8000/api/feedback", {
         orderId: order.order_id,
         rating: feedback.rating,
-        comments: feedback.comments,
+        feedbackText: feedback.comments,
       });
       alert("Feedback submitted successfully");
       fetchFeedbackForOrder(order.order_id); // Refresh feedback
@@ -125,12 +131,23 @@ const [feedbackForm, setFeedbackForm] = useState({});
     }
   };
 
+  // const handleLogout = () => {
+  //   axios.post("/logout", {}, { withCredentials: true }).then(() => {
+  //     localStorage.removeItem("token");
+  //     window.location.href = "/login";
+  //   });
+  // };
+
   const handleLogout = () => {
-    axios.post("/logout", {}, { withCredentials: true }).then(() => {
-      localStorage.removeItem("token");
-      window.location.href = "/login";
-    });
+    axios.post("http://localhost:8000/logout", {}, { withCredentials: true })
+      .then(() => {
+        window.location.href = "/login"; // redirect to login
+      })
+      .catch((err) => {
+        console.error("Logout failed:", err);
+      });
   };
+  
 
   if (!user) return <div className="text-white text-center mt-10">Loading...</div>;
 
@@ -225,7 +242,7 @@ const [feedbackForm, setFeedbackForm] = useState({});
     className="bg-[#3a3a3c] p-4 rounded-lg shadow-md border border-gray-500"
   >
   <p><strong>Order ID:</strong> {order.order_id}</p>
-<p><strong>Name:</strong> {order.name}</p>
+<p><strong>Nameee:</strong> {order.name}</p>
 <p><strong>Email:</strong> {order.email}</p>
 <p><strong>Pickup Location:</strong> {order.pickup_loc}</p>
 <p><strong>Dropoff Location:</strong> {order.dropoff_loc}</p>
@@ -240,12 +257,12 @@ const [feedbackForm, setFeedbackForm] = useState({});
 <div className="mt-4 border-t pt-4">
   <h3 className="text-lg font-semibold text-white">Feedback</h3>
 
-  {feedbacks[order.order_id] && feedbacks[order.order_id].rating ? (
-    <div className="mt-2">
-      <p><strong>Rating:</strong> {feedbacks[order.order_id].rating} ⭐</p>
-      <p><strong>Comments:</strong> {feedbacks[order.order_id].comments}</p>
-    </div>
-  ) : (
+  {feedbacks[order._id] ? (
+  <div className="mt-2">
+    <p><strong>Rating:</strong> {feedbacks[order._id].rating} ⭐</p>
+    <p><strong>Comments:</strong> {feedbacks[order._id].feedbackText}</p>
+  </div>
+) : (
     <div className="mt-2 space-y-2">
       <label className="block text-sm">Rating:</label>
       <select
@@ -305,311 +322,3 @@ const [feedbackForm, setFeedbackForm] = useState({});
 
 export default Profile;
 
-
-
-// import React, { useState, useEffect } from "react";
-// import axios from "axios";
-
-// const Profile = () => {
-//   const [user, setUser] = useState(null);
-//   const [isEditing, setIsEditing] = useState(false);
-//   const [formData, setFormData] = useState({
-//     name: "",
-//     email: "",
-//     city: "",
-//     phone: "",
-//     address: "",
-//   });
-//   const [profilePic, setProfilePic] = useState(null);
-//   const [preview, setPreview] = useState("");
-
-//   useEffect(() => {
-//     axios
-//       .get("/api/profile", { withCredentials: true })
-//       .then((response) => {
-//         if (response.data.success) {
-//           setUser(response.data.user);
-//           setFormData({
-//             name: response.data.user.name,
-//             email: response.data.user.email,
-//             city: response.data.user.city,
-//             phone: response.data.user.phone,
-//             address: response.data.user.address,
-//           });
-//           setPreview(response.data.user.profilePicture || "/Images/avatar.jpeg");
-//         }
-//       })
-//       .catch((err) => console.error("Error fetching profile:", err));
-//   }, []);
-
-//   const handleChange = (e) => {
-//     const { name, value } = e.target;
-//     setFormData((prev) => ({ ...prev, [name]: value }));
-//   };
-
-//   const handleImageChange = (e) => {
-//     const file = e.target.files[0];
-//     setProfilePic(file);
-//     setPreview(URL.createObjectURL(file));
-//   };
-
-//   const handleSubmit = async (e) => {
-//     e.preventDefault();
-
-//     const data = new FormData();
-//     data.append("name", formData.name);
-//     data.append("email", formData.email);
-//     data.append("city", formData.city);
-//     data.append("phone", formData.phone);
-//     data.append("address", formData.address);
-//     if (profilePic) data.append("profilePicture", profilePic);
-
-//     try {
-//       const response = await axios.put("/api/profile", data, {
-//         headers: { "Content-Type": "multipart/form-data" },
-//         withCredentials: true,
-//       });
-//       if (response.data.success) {
-//         setUser(response.data.user);
-//         setIsEditing(false);
-//       }
-//     } catch (err) {
-//       console.error("Error updating profile:", err);
-//     }
-//   };
-
-//   const handleLogout = () => {
-//     axios.post("/logout", {}, { withCredentials: true }).then(() => {
-//       localStorage.removeItem("token");
-//       window.location.href = "/login";
-//     });
-//   };
-
-//   if (!user) return <div className="text-white text-center mt-10">Loading...</div>;
-
-//   return (
-//     <div className="min-h-screen bg-[#f5f5f5] text-white flex items-center justify-center p-6">
-//       <div className="shadow-xl rounded-2xl p-8 bg-[#2c2c2e] max-w-lg w-full border border-gray-600">
-//         <div className="flex justify-center items-center flex-col mb-6">
-//           <img
-//             src={preview}
-//             alt="Profile"
-//             className="w-36 h-36 rounded-full object-cover border-4 border-[#f5f5f5] shadow-md"
-//           />
-//         </div>
-
-//         {isEditing ? (
-//           <form onSubmit={handleSubmit} encType="multipart/form-data">
-//             <div className="mb-4">
-//               <label className="block text-sm font-semibold text-[#f5f5f5] mb-1">Profile Picture</label>
-//               <input
-//                 type="file"
-//                 accept="image/*"
-//                 onChange={handleImageChange}
-//                 className="w-full px-3 py-2 bg-[#3a3a3c] border border-gray-500 rounded-md text-white"
-//               />
-//             </div>
-//             {["name", "email", "city", "phone"].map((field) => (
-//               <div key={field} className="mb-4">
-//                 <label className="block text-sm font-semibold text-[#f5f5f5] mb-1 capitalize">{field}</label>
-//                 <input
-//                   type={field === "email" ? "email" : "text"}
-//                   name={field}
-//                   value={formData[field]}
-//                   onChange={handleChange}
-//                   className="w-full px-3 py-2 bg-[#3a3a3c] border border-gray-500 rounded-md text-white"
-//                 />
-//               </div>
-//             ))}
-//             <div className="mb-6">
-//               <label className="block text-sm font-semibold text-[#f5f5f5] mb-1">Address</label>
-//               <textarea
-//                 name="address"
-//                 value={formData.address}
-//                 onChange={handleChange}
-//                 className="w-full px-3 py-2 bg-[#3a3a3c] border border-gray-500 rounded-md text-white"
-//               />
-//             </div>
-//             <button
-//               type="submit"
-//               className="w-full bg-[#f5f5f5] text-black font-semibold py-2 rounded-md hover:bg-gray-300 transition"
-//             >
-//               Save Changes
-//             </button>
-//           </form>
-//         ) : (
-//           <div>
-//             {["name", "email", "city", "phone", "address"].map((field) => (
-//               <div key={field} className="mb-4">
-//                 <p className="text-sm font-semibold text-[#f5f5f5] capitalize">{field}</p>
-//                 <p className="text-white">{user[field]}</p>
-//               </div>
-//             ))}
-//           </div>
-//         )}
-
-//         <div className="flex justify-between mt-6">
-//           <button
-//             onClick={() => setIsEditing(!isEditing)}
-//             className="bg-[#f5f5f5] text-black font-semibold py-2 px-4 rounded-md hover:bg-gray-300 transition"
-//           >
-//             {isEditing ? "Cancel" : "Edit"}
-//           </button>
-//           <button
-//             onClick={handleLogout}
-//             className="bg-red-600 text-white font-semibold py-2 px-4 rounded-md hover:bg-red-700 transition"
-//           >
-//             Logout
-//           </button>
-//         </div>
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default Profile;
-
-
-
-// import React, { useState, useEffect } from "react";
-// import axios from "axios";
-
-// const Profile = () => {
-//   const [user, setUser] = useState(null);
-//   const [isEditing, setIsEditing] = useState(false);
-//   const [formData, setFormData] = useState({
-//     name: "",
-//     email: "",
-//     city: "",
-//     phone: "",
-//     address: "",
-//   });
-//   const [profilePic, setProfilePic] = useState(null);
-//   const [preview, setPreview] = useState("");
-
-//   useEffect(() => {
-//     axios
-//       .get("/api/profile", { withCredentials: true })
-//       .then((response) => {
-//         if (response.data.success) {
-//           setUser(response.data.user);
-//           setFormData({
-//             name: response.data.user.name,
-//             email: response.data.user.email,
-//             city: response.data.user.city,
-//             phone: response.data.user.phone,
-//             address: response.data.user.address,
-//           });
-//           setPreview(response.data.user.profilePicture || "/Images/avatar.jpeg");
-//         }
-//       })
-//       .catch((err) => console.error("Error fetching profile:", err));
-//   }, []);
-
-//   const handleChange = (e) => {
-//     const { name, value } = e.target;
-//     setFormData((prev) => ({ ...prev, [name]: value }));
-//   };
-
-//   const handleImageChange = (e) => {
-//     const file = e.target.files[0];
-//     setProfilePic(file);
-//     setPreview(URL.createObjectURL(file));
-//   };
-
-//   const handleSubmit = async (e) => {
-//     e.preventDefault();
-    
-//     const data = new FormData();
-//     data.append("name", formData.name);
-//     data.append("email", formData.email);
-//     data.append("city", formData.city);
-//     data.append("phone", formData.phone);
-//     data.append("address", formData.address);
-//     if (profilePic) data.append("profilePicture", profilePic);
-
-//     try {
-//       const response = await axios.put("/api/profile", data, {
-//         headers: { "Content-Type": "multipart/form-data" },
-//         withCredentials: true,
-//       });
-//       if (response.data.success) {
-//         setUser(response.data.user);
-//         setIsEditing(false);
-//       }
-//     } catch (err) {
-//       console.error("Error updating profile:", err);
-//     }
-//   };
-
-//   const handleLogout = () => {
-//     axios.post("/logout", {}, { withCredentials: true }).then(() => {
-//       localStorage.removeItem("token");
-//       window.location.href = "/login";
-//     });
-//   };
-
-//   if (!user) return <div>Loading...</div>;
-
-//   return (
-//     <div className="min-h-screen bg-gradient-to-tr from-gray-900 via-gray-500 to-black flex items-center justify-center p-6">
-//       <div className="shadow-2xl rounded-2xl p-6 bg-white max-w-lg w-full">
-//         <div className="flex justify-center items-center flex-col mb-6">
-//           <img src={preview} alt="Profile" className="w-40 h-40 rounded-full object-cover border-4 border-indigo-400 shadow-md" />
-//         </div>
-
-//         {isEditing ? (
-//           <form onSubmit={handleSubmit} encType="multipart/form-data">
-//             <div className="mb-4">
-//               <label className="block text-gray-600 font-semibold">Profile Picture</label>
-//               <input type="file" accept="image/*" onChange={handleImageChange} className="w-full px-3 py-2 border rounded-md" />
-//             </div>
-//             <div className="mb-4">
-//               <label className="block text-gray-600 font-semibold">Name</label>
-//               <input type="text" name="name" value={formData.name} onChange={handleChange} className="w-full px-3 py-2 border rounded-md" />
-//             </div>
-//             <div className="mb-4">
-//               <label className="block text-gray-600 font-semibold">Email</label>
-//               <input type="email" name="email" value={formData.email} onChange={handleChange} className="w-full px-3 py-2 border rounded-md" />
-//             </div>
-//             <div className="mb-4">
-//               <label className="block text-gray-600 font-semibold">City</label>
-//               <input type="text" name="city" value={formData.city} onChange={handleChange} className="w-full px-3 py-2 border rounded-md" />
-//             </div>
-//             <div className="mb-4">
-//               <label className="block text-gray-600 font-semibold">Phone</label>
-//               <input type="text" name="phone" value={formData.phone} onChange={handleChange} className="w-full px-3 py-2 border rounded-md" />
-//             </div>
-//             <div className="mb-6">
-//               <label className="block text-gray-600 font-semibold">Address</label>
-//               <textarea name="address" value={formData.address} onChange={handleChange} className="w-full px-3 py-2 border rounded-md"></textarea>
-//             </div>
-
-//             <button type="submit" className="w-full bg-indigo-500 text-white py-2 rounded-md hover:bg-indigo-600">
-//               Save Changes
-//             </button>
-//           </form>
-//         ) : (
-//           <div>
-//             <div className="mb-4"><p className="text-gray-600 font-semibold">Name</p><p className="text-gray-800">{user.name}</p></div>
-//             <div className="mb-4"><p className="text-gray-600 font-semibold">Email</p><p className="text-gray-800">{user.email}</p></div>
-//             <div className="mb-4"><p className="text-gray-600 font-semibold">City</p><p className="text-gray-800">{user.city}</p></div>
-//             <div className="mb-4"><p className="text-gray-600 font-semibold">Phone</p><p className="text-gray-800">{user.phone}</p></div>
-//             <div className="mb-6"><p className="text-gray-600 font-semibold">Address</p><p className="text-gray-800">{user.address}</p></div>
-//           </div>
-//         )}
-
-//         <div className="flex justify-between mt-6">
-//           <button onClick={() => setIsEditing(!isEditing)} className="bg-gray-700 text-white py-2 px-4 rounded-md hover:bg-gray-800">
-//             {isEditing ? "Cancel" : "Edit"}
-//           </button>
-//           <button onClick={handleLogout} className="bg-red-500 text-white py-2 px-4 rounded-md hover:bg-red-600">
-//             Logout
-//           </button>
-//         </div>
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default Profile;

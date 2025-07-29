@@ -13,22 +13,36 @@ function Nav() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      setLoading(false);
-      return;
-    }
+  // useEffect(() => {
+  //   const token = localStorage.getItem("token");
+  //   console.log("Token - ",token);
+  //   if (!token) {
+  //     setLoading(false);
+  //     return;
+  //   }
+  //   fetch("http://localhost:8000/auth/status", {
+  //     method: "GET",
+  //     credentials: 'include',
+  //   })
+  //     .then((res) => res.ok ? res.json() : Promise.reject())
+  //     .then((data) => {
+  //       console.log("Data.loggedIN",data);
+  //       setIsLoggedIn(data.loggedIn);
+  //       setUser(data.user);
+  //     })
+  //     .catch(() => setIsLoggedIn(false))
+  //     .finally(() => setLoading(false));
+    
+  // }, []);
 
-    fetch("/auth/status", {
+
+  useEffect(() => {
+    setLoading(true); // Optional
+    fetch("http://localhost:8000/auth/status", {
       method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      credentials: "include",
+      credentials: 'include',
     })
-      .then((res) => (res.ok ? res.json() : Promise.reject()))
+      .then((res) => res.ok ? res.json() : Promise.reject())
       .then((data) => {
         setIsLoggedIn(data.loggedIn);
         setUser(data.user);
@@ -36,7 +50,7 @@ function Nav() {
       .catch(() => setIsLoggedIn(false))
       .finally(() => setLoading(false));
   }, []);
-
+  
   useEffect(() => {
     const handleScroll = () => {
       setScrolling(window.scrollY > 50);

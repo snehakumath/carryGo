@@ -9,29 +9,46 @@ function Nav() {
   const [isNotifOpen, setIsNotifOpen] = useState(false);
   const [notifications, setNotifications] = useState([]);
 
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      setIsLoggedIn(false);
-      setUser(null);
-      setLoading(false);
-      return;
-    }
+  // useEffect(() => {
+  //   const token = localStorage.getItem("token");
+  //   if (!token) {
+  //     setIsLoggedIn(false);
+  //     setUser(null);
+  //     setLoading(false);
+  //     return;
+  //   }
 
-    fetch("/auth/status", {
+  //   fetch("/auth/status", {
+  //     method: "GET",
+  //     headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+  //     credentials: "include",
+  //   })
+  //     .then((res) => res.json())
+  //     .then((data) => {
+  //       setIsLoggedIn(data.loggedIn);
+  //       setUser(data.user || null);
+  //     })
+  //     .catch(() => setIsLoggedIn(false))
+  //     .finally(() => setLoading(false));
+  // }, []);
+
+  useEffect(() => {
+    fetch("http://localhost:8000/auth/status", {
       method: "GET",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-      credentials: "include",
+      credentials: "include", // include cookies
     })
-      .then((res) => res.json())
+      .then((res) => res.ok ? res.json() : Promise.reject())
       .then((data) => {
         setIsLoggedIn(data.loggedIn);
         setUser(data.user || null);
       })
-      .catch(() => setIsLoggedIn(false))
+      .catch(() => {
+        setIsLoggedIn(false);
+        setUser(null);
+      })
       .finally(() => setLoading(false));
   }, []);
-
+  
   return (
     // Only styling updated - structure untouched
 <nav className="bg-black border-b border-gray-800 shadow-md relative">

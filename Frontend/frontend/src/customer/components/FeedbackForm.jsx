@@ -14,7 +14,7 @@ const FeedbackForm = ({ orderId, transporterId, userEmail }) => {
         order_id: orderId,
         transporter_id: transporterId,
         rating,
-        comments,
+        feedbackText: comments,
       });
       if (res.data.success) {
         setSubmitted(true);

@@ -50,9 +50,10 @@ const bookingSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ["Pending", "Accepted", "Rejected", "Assigned","Paid","Completed"],
+    enum: ["Pending", "Accepted", "Rejected", "Assigned", "Paid", "Completed", "Cancelled"],
     default: "Pending",
   },
+  
   transporter_email: {
     type:Schema.Types.ObjectId,
     ref:"User",
@@ -77,6 +78,23 @@ const bookingSchema = new mongoose.Schema({
     type: Number,
     default: null,
   },  
+  cancelled_by_transporter: {
+    type: Boolean,
+    default: false,
+  },
+  cancelled_by_customer: {
+    type: Boolean,
+    default: false,
+  },  
+  is_shared: {
+    type: Boolean,
+    default: false,
+  },
+  shared_with_email: {
+    type: String,
+    match: [/.+@.+\..+/, "Please provide a valid email address"],
+    default: null,
+  },
 }, { timestamps: true });
 
 module.exports = mongoose.model("Booking", bookingSchema);

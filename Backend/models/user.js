@@ -12,6 +12,11 @@ const userSchema = new Schema({
     address: { type: String },
     city: { type: String },
     salt: { type: String },
+    status: {
+        type: String,
+        enum: ["Active", "Suspended"],
+        default: "Active",
+      },      
     profilePicture: { 
         type: String, 
         default: 'C:\Users\asus\OneDrive\My-project\carryGo\Frontend\frontend\public\Images\avatar.jpeg' // Default profile picture path
@@ -34,7 +39,7 @@ userSchema.static("matchPasswordAndGenerateToken", async function (user_type, em
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) throw new Error("Incorrect Password");
 
-    const token = jwt.sign({ email: user.email, user_type: user.user_type }, process.env.JWT_SECRET || '$uperMan@123', { expiresIn: '1h' });
+    const token = jwt.sign({ email: user.email, user_type: user.user_type }, process.env.JWT_SECRET , { expiresIn: '1h' });
     return token;
 });
 
