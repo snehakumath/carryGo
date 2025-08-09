@@ -12,12 +12,12 @@ const Booking = () => {
   const [selectedVehicles, setSelectedVehicles] = useState({});
   const [assignedTrucks, setAssignedTrucks] = useState({});
 
-
+  const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || "http://localhost:8000";
   // Fetch logged-in transporter's email
   useEffect(() => {
     const fetchUserEmail = async () => {
       try {
-        const response = await axios.get("http://localhost:8000/booking/user/me", { withCredentials: true });
+        const response = await axios.get(`${BACKEND_URL}/booking/user/me`, { withCredentials: true });
         setTransporterEmail(response.data.email);
       } catch (error) {
         console.error("Failed to retrieve user info:", error);
@@ -29,7 +29,7 @@ const Booking = () => {
   useEffect(() => {
         if (!transporterEmail) return;
       
-        axios.get(`http://localhost:8000/booking/trucks/${transporterEmail}`)
+        axios.get(`${BACKEND_URL}/booking/trucks/${transporterEmail}`)
           .then((res) => {
             console.log("Trucks API Response:", res.data);
             if (Array.isArray(res.data)) {
@@ -52,7 +52,7 @@ const Booking = () => {
   useEffect(() => {
     if (!transporterEmail) return;
 
-    axios.get(`http://localhost:8000/booking/orders?transporterEmail=${transporterEmail}`)
+    axios.get(`${BACKEND_URL}/booking/orders?transporterEmail=${transporterEmail}`)
       .then((res) => {
         console.log("Response Data:", res.data);
         setAvailableOrders(res.data.availableOrders || []);
@@ -78,7 +78,7 @@ const Booking = () => {
   
     try {
       const response = await axios.post(
-        "http://localhost:8000/api/bids/place-bid",
+       `${BACKEND_URL}/api/bids/place-bid`,
         {
           booking_id: orderId,
           transporter_email: transporterEmail,
@@ -91,7 +91,7 @@ const Booking = () => {
   
       // ✅ Re-fetch updated orders from backend
       const updated = await axios.get(
-        `http://localhost:8000/booking/orders?transporterEmail=${transporterEmail}`
+        `${BACKEND_URL}/booking/orders?transporterEmail=${transporterEmail}`
       );
       setPlacedBids((prevBids) => {
         const placedOrder = availableOrders.find((order) => order._id === orderId);
@@ -121,7 +121,7 @@ const Booking = () => {
   };const handleCancelOrder = async (orderId) => {
     try {
       const response = await axios.post(
-        "http://localhost:8000/booking/cancel-booking",
+       `${BACKEND_URL}/booking/cancel-booking`,
         {
           booking_id: orderId,
           transporter_email: transporterEmail,
@@ -147,7 +147,7 @@ const Booking = () => {
   
       // 🔄 Refresh orders after cancellation
       const updatedOrders = await axios.get(
-        `http://localhost:8000/booking/orders?transporterEmail=${transporterEmail}`,
+        `${BACKEND_URL}/booking/orders?transporterEmail=${transporterEmail}`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -171,7 +171,7 @@ const Booking = () => {
     try {
       console.log(orderId,selectedTruckId,truck_shared);
       const response = await axios.post(
-        "http://localhost:8000/booking/assign-truck",
+        `${BACKEND_URL}/booking/assign-truck`,
         {
           booking_id: orderId,
           vehicle_id: selectedTruckId,
@@ -186,12 +186,12 @@ const Booking = () => {
   
       // Optionally refresh accepted orders and truck list
       const updatedOrders = await axios.get(
-        `http://localhost:8000/booking/orders?transporterEmail=${transporterEmail}`
+        `${BACKEND_URL}/booking/orders?transporterEmail=${transporterEmail}`
       );
       setAcceptedOrders(updatedOrders.data.acceptedOrders || []);
   
       const updatedTrucks = await axios.get(
-        `http://localhost:8000/booking/trucks/${transporterEmail}`
+        `${BACKEND_URL}/booking/trucks/${transporterEmail}`
       );
       const available = updatedTrucks.data.filter(truck => truck.availability_status === true );
       const busy = updatedTrucks.data.filter(truck => truck.availability_status !== true );
@@ -207,7 +207,7 @@ const Booking = () => {
   const markAsAvailable = async (truckId) => {
    
     try {
-      await axios.put(`http://localhost:8000/booking/vehicles/make-available/${truckId}`, {
+      await axios.put(`${BACKEND_URL}/booking/vehicles/make-available/${truckId}`, {
         status: "available"
       }, {
         headers: {
@@ -226,7 +226,7 @@ const Booking = () => {
   const handleCompletedOrder = async (orderId) => {
     try {
       const response = await axios.post(
-        "http://localhost:8000/booking/complete-order",
+       `${BACKEND_URL}/booking/complete-order`,
         { booking_id: orderId}, // your backend should accept this
         {
           headers: {
@@ -239,13 +239,13 @@ const Booking = () => {
   
       // ✅ Re-fetch updated acceptedOrders
       const updatedOrders = await axios.get(
-        `http://localhost:8000/booking/orders?transporterEmail=${transporterEmail}`
+        `${BACKEND_URL}/booking/orders?transporterEmail=${transporterEmail}`
       );
       setAcceptedOrders(updatedOrders.data.acceptedOrders || []);
   
       // ✅ Optional: Also update busy/available trucks (if truck status is reset on complete)
       const updatedTrucks = await axios.get(
-        `http://localhost:8000/booking/trucks/${transporterEmail}`
+       `${BACKEND_URL}/booking/trucks/${transporterEmail}`
       );
       const available = updatedTrucks.data.filter(t => t.availability_status === true);
       const busy = updatedTrucks.data.filter(t => t.availability_status === false);

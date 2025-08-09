@@ -6,10 +6,10 @@ const Notification = () => {
   const [notifications, setNotifications] = useState([]);
   const seenNotificationIds = useRef(new Set());
   const socketRef = useRef(null);
-
+  const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || "http://localhost:8000";
   useEffect(() => {
     if (!socketRef.current) {
-      socketRef.current = io("http://localhost:8000");
+      socketRef.current = io(BACKEND_URL);
     }
 
     const socket = socketRef.current;

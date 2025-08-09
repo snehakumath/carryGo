@@ -10,12 +10,13 @@ const GoodsTracking = () => {
   const [isPaymentDone, setIsPaymentDone] = useState(false);
   const [assignedOrder, setAssignedOrder] = useState(null);
   const [availableToShare, setAvailableToShare] = useState([]);
+  const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || "http://localhost:8000";
 
   
   useEffect(() => {
     const fetchUserEmail = async () => {
       try {
-        const response = await axios.get("http://localhost:8000/booking/user/me", { withCredentials: true });
+        const response = await axios.get(`${BACKEND_URL}/booking/user/me`, { withCredentials: true });
         setUserEmail(response.data.email);
       } catch (error) {
         console.error("Failed to retrieve user info:", error);
@@ -27,7 +28,7 @@ const GoodsTracking = () => {
   useEffect(() => {
     const fetchGoods = async () => {
       try {
-        const response = await axios.get("http://localhost:8000/booking/goods");
+        const response = await axios.get(`${BACKEND_URL}/booking/goods`);
         const today = new Date();
       today.setHours(0, 0, 0, 0); // Normalize time for comparison
       // console.log("REsponse",response);
@@ -55,14 +56,14 @@ const GoodsTracking = () => {
     const fetchBids = async () => {
       console.log("fetchBids hit");
       try {
-        const response = await axios.get(`http://localhost:8000/api/bids/received/${selectedGood._id}`);
+        const response = await axios.get(`${BACKEND_URL}/api/bids/received/${selectedGood._id}`);
   
         const bidsWithStats = await Promise.all(
           response.data.map(async (bid) => {
             try {
               console.log("email",bid.transporter.email);
               const statsRes = await axios.get(
-                `http://localhost:8000/api/transporter/stats/${bid.transporter.email}`
+                `${BACKEND_URL}/api/transporter/stats/${bid.transporter.email}`
               );
               console.log("stats",statsRes, statsRes.data.avgRating,
                 statsRes.data.successRate);
@@ -95,7 +96,7 @@ const GoodsTracking = () => {
   
   const fetchGoods = async () => {
     try {
-      const response = await axios.get("http://localhost:8000/booking/goods");
+      const response = await axios.get(`${BACKEND_URL}/booking/goods`);
       const today = new Date();
       today.setHours(0, 0, 0, 0);
   
@@ -138,7 +139,7 @@ const GoodsTracking = () => {
         return;
       }
      
-      const response = await axios.post("http://localhost:8000/api/payments/create-order", {
+      const response = await axios.post(`${BACKEND_URL}/api/payments/create-order`, {
         amount,
         order_id,
         transporter_email: order.transporter_email?.email
@@ -156,7 +157,7 @@ const GoodsTracking = () => {
         description: "Transport Booking Payment",
         order_id: orderId,
         handler: async function (response) {
-          const verification = await axios.post("http://localhost:8000/api/payments/verify", {
+          const verification = await axios.post(`${BACKEND_URL}/api/payments/verify`, {
             razorpay_order_id: response.razorpay_order_id,
             razorpay_payment_id: response.razorpay_payment_id,
             razorpay_signature: response.razorpay_signature,
@@ -189,7 +190,7 @@ const GoodsTracking = () => {
   const placeBid = async () => {
     if (!bidAmount || !selectedGood) return;
     try {
-      const response = await axios.post("http://localhost:8000/api/bids/bids", {
+      const response = await axios.post(`${BACKEND_URL}/api/bids/bids`, {
         good_id: selectedGood._id,
         transporter_email: userEmail,
         amount: bidAmount,
@@ -207,7 +208,7 @@ const GoodsTracking = () => {
   const acceptBid = async (bid) => {
     console.log("Bid",bid);
     try {
-      await axios.post("http://localhost:8000/api/bids/customer/accept", {
+      await axios.post(`${BACKEND_URL}/api/bids/customer/accept`, {
         good_id: selectedGood._id,
         transporter_email: bid.transporter.email,
         amount: bid.bid_amount,

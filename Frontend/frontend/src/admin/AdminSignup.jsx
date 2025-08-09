@@ -16,7 +16,7 @@ const AdminSignup = () => {
     setError('');
 
     try {
-      const res = await axios.post('http://localhost:8000/api/admin/signup', {
+      const res = await axios.post(`${BACKEND_URL}/api/admin/signup`, {
         name: adminName,
         email,
         password,

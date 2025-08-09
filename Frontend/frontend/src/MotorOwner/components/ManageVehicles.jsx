@@ -190,13 +190,13 @@ const AddVehicleWithList = () => {
     height: "",
     availability_status: true,
   });
-
+  const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || "http://localhost:8000";
   const [vehicleList, setVehicleList] = useState([]);
    const [transporterEmail, setTransporterEmail] = useState(null);
   useEffect(() => {
     const fetchUserEmail = async () => {
       try {
-        const response = await axios.get("http://localhost:8000/booking/user/me", { withCredentials: true });
+        const response = await axios.get(`${BACKEND_URL}/booking/user/me`, { withCredentials: true });
         setTransporterEmail(response.data.email);
       } catch (error) {
         console.error("Failed to retrieve user info:", error);
@@ -210,7 +210,7 @@ const AddVehicleWithList = () => {
       if (!transporterEmail) return; // Ensure transporterEmail is defined
   
       try {
-        const response = await fetch(`http://localhost:8000/booking/trucks/${transporterEmail}`);
+        const response = await fetch(`${BACKEND_URL}/booking/trucks/${transporterEmail}`);
   
         if (!response.ok) {
           throw new Error(`HTTP error! Status: ${response.status}`);
@@ -256,7 +256,7 @@ const AddVehicleWithList = () => {
     }
 
     try {
-      const response = await fetch("http://localhost:8000/api/vehicles", {
+      const response = await fetch(`${BACKEND_URL}/api/vehicles`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

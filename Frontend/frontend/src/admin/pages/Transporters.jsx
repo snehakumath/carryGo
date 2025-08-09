@@ -6,12 +6,12 @@ const AdminTransporters = () => {
   const [transporters, setTransporters] = useState([]);
   const [search, setSearch] = useState("");
   const [selectedEmail, setSelectedEmail] = useState(null); // new
-
+  const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || "http://localhost:8000";
   useEffect(() => {
     const fetchData = async () => {
       try {
         const token = localStorage.getItem("adminToken");
-        const res = await axios.get("/api/admin/transporters", {
+        const res = await axios.get(`${BACKEND_URL}/api/admin/transporters`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         setTransporters(res.data);

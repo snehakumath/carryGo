@@ -13,6 +13,7 @@ const Signup = () => {
   });
   const [error, setError] = useState(null);
   const navigate = useNavigate();
+  const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || "http://localhost:8000";
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -26,7 +27,7 @@ const Signup = () => {
     e.preventDefault();
     try {
       // Post data to the backend
-      const response = await axios.post('http://localhost:8000/signup', formData);
+      const response = await axios.post(`${BACKEND_URL}/signup`, formData);
       if (response.data.success) {
         alert('Signup successful!');
         navigate('/'); // Redirect to home page

@@ -3,7 +3,9 @@ import { io } from "socket.io-client";
 import { X } from "lucide-react";
 import axios from "axios";
 
-const socket = io("http://localhost:8000");
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || "http://localhost:8000";
+const socket = io(BACKEND_URL);
+
 
 const CustomerNotification = ({ onClose }) => {
   const [notifications, setNotifications] = useState([]);
@@ -11,8 +13,7 @@ const CustomerNotification = ({ onClose }) => {
   
   useEffect(() => {
       // Fetch user profile data from the backend
-      axios
-        .get("/api/profile")
+      axios.get(`${BACKEND_URL}/api/profile`)
         .then((response) => {
           if (response.data.success) {
               setCustomerEmail(response.data.user.email);
@@ -57,7 +58,7 @@ const CustomerNotification = ({ onClose }) => {
   // Mark notifications as read when opened
   const markAsRead = async () => {
     try {
-      await fetch("http://localhost:8000/api/notifications/markAsRead", {
+      await fetch(`${BACKEND_URL}/api/notifications/markAsRead`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: customerEmail }),

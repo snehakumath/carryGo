@@ -44,10 +44,11 @@ const BookingForm = () => {
   //     })
   //     .catch(() => setIsLoggedIn(false));
   // }, []);
+  const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || "http://localhost:8000";
 
    useEffect(() => {
       setLoading(true); // Optional
-      fetch("http://localhost:8000/auth/status", {
+      fetch(`${BACKEND_URL}/auth/status`, {
         method: "GET",
         credentials: 'include',
       })
@@ -138,7 +139,7 @@ const BookingForm = () => {
     };
   
     try {
-      const response = await axios.post(`http://localhost:8000/booking/process`, payload);
+      const response = await axios.post(`${BACKEND_URL}/booking/process`, payload);
       if (response.status === 201) {
         setShowSuccessGif(true);
         setTimeout(() => {

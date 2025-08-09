@@ -5,11 +5,13 @@ const FeedbackForm = ({ orderId, transporterId, userEmail }) => {
   const [rating, setRating] = useState(5);
   const [comments, setComments] = useState("");
   const [submitted, setSubmitted] = useState(false);
+ 
+  const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || "http://localhost:8000";
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post("/api/feedback", {
+      const res = await axios.post(`${BACKEND_URL}/api/feedback`, {
         email: userEmail,
         order_id: orderId,
         transporter_id: transporterId,

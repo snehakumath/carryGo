@@ -26,15 +26,13 @@ const AdminHome = () => {
     transporterStatusCount: [],
     monthlySuccessRate: [],
   });
-  useEffect(() => {
-    console.log("Hello");
-  }, []); // ← must add this
+  const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || "http://localhost:8000";
   
   useEffect(() => {
     const fetchSummary = async () => {
       console.log("summary");
       try {
-        const res = await axios.get("http://localhost:5000/admin/summary", {
+        const res = await axios.get(`${BACKEND_URL}/admin/summary`, {
           withCredentials: true,
         });
         setSummary(res.data);

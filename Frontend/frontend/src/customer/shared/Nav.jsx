@@ -34,11 +34,11 @@ function Nav() {
   //     .finally(() => setLoading(false));
     
   // }, []);
-
+  const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || "http://localhost:8000";
 
   useEffect(() => {
     setLoading(true); // Optional
-    fetch("http://localhost:8000/auth/status", {
+    fetch(`${BACKEND_URL}/auth/status`, {
       method: "GET",
       credentials: 'include',
     })

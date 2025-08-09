@@ -10,6 +10,7 @@ const Profile = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [feedbacks, setFeedbacks] = useState({});
 const [feedbackForm, setFeedbackForm] = useState({});
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || "http://localhost:8000";
 
   const [formData, setFormData] = useState({
     name: "",
@@ -23,7 +24,7 @@ const [feedbackForm, setFeedbackForm] = useState({});
 
   useEffect(() => {
     axios
-      .get("/api/profile", { withCredentials: true })
+      .get(`${BACKEND_URL}/api/profile`, { withCredentials: true })
       .then((response) => {
         if (response.data.success) {
           const userData = response.data.user;
@@ -48,7 +49,7 @@ const [feedbackForm, setFeedbackForm] = useState({});
   const fetchOrders = async (email) => {
     try {
       console.log("email",email);
-      const response = await axios.get(`http://localhost:8000/booking/view-orders/${email}`);
+      const response = await axios.get(`${BACKEND_URL}/booking/view-orders/${email}`);
         console.log("response",response);
       if (Array.isArray(response.data.orders)) {
         setOrders(response.data.orders);
@@ -65,7 +66,7 @@ const [feedbackForm, setFeedbackForm] = useState({});
   const fetchFeedbackForOrder = async (orderId) => {
     try {
       console.log("fetch",orderId);
-      const res = await axios.get(`http://localhost:8000/api/feedback/${orderId}`);
+      const res = await axios.get(`${BACKEND_URL}/api/feedback/${orderId}`);
       console.log("REs",res);
       if (res.data.feedback && res.data.feedback.orderId) {
         setFeedbacks((prev) => ({ ...prev, [res.data.feedback.orderId]: res.data.feedback }));
@@ -84,7 +85,7 @@ const [feedbackForm, setFeedbackForm] = useState({});
     }
    console.log("Feedback: ",feedback,feedback.rating,feedback.comments);
     try {
-      await axios.post("http://localhost:8000/api/feedback", {
+      await axios.post(`${BACKEND_URL}/api/feedback`, {
         orderId: order.order_id,
         rating: feedback.rating,
         feedbackText: feedback.comments,
@@ -118,7 +119,7 @@ const [feedbackForm, setFeedbackForm] = useState({});
     if (profilePic) data.append("profilePicture", profilePic);
 
     try {
-      const response = await axios.put("/api/profile", data, {
+      const response = await axios.put(`${BACKEND_URL}/api/profile`, data, {
         headers: { "Content-Type": "multipart/form-data" },
         withCredentials: true,
       });
@@ -139,7 +140,7 @@ const [feedbackForm, setFeedbackForm] = useState({});
   // };
 
   const handleLogout = () => {
-    axios.post("http://localhost:8000/logout", {}, { withCredentials: true })
+    axios.post(`${BACKEND_URL}/logout`, {}, { withCredentials: true })
       .then(() => {
         window.location.href = "/login"; // redirect to login
       })

@@ -5,14 +5,14 @@ const CustomerProfile = ({ email, onBack }) => {
   const [customer, setCustomer] = useState(null);
   const [bookings, setBookings] = useState([]);
   const [search, setSearch] = useState("");
-
+  const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || "http://localhost:8000";
   useEffect(() => {
     console.log("Profile hitt");
     const fetchData = async () => {
       try {
         const token = localStorage.getItem("adminToken");
 
-        const res1 = await axios.get(`/api/admin/customers`, {
+        const res1 = await axios.get(`${BACKEND_URL}/api/admin/customers`, {
           headers: { Authorization: `Bearer ${token}` },
         });
 
@@ -25,7 +25,7 @@ const CustomerProfile = ({ email, onBack }) => {
 
         setCustomer(user);
 
-        const res2 = await axios.get(`/api/admin/customer-bookings/${email}`, {
+        const res2 = await axios.get(`${BACKEND_URL}/api/admin/customer-bookings/${email}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         setBookings(res2.data);
@@ -38,7 +38,7 @@ const CustomerProfile = ({ email, onBack }) => {
   const handleToggleStatus = async (id) => {
     try {
       const token = localStorage.getItem("adminToken");
-      const res = await axios.patch(`/api/admin/toggle-user-status/${id}`, {}, {
+      const res = await axios.patch(`${BACKEND_URL}/api/admin/toggle-user-status/${id}`, {}, {
         headers: { Authorization: `Bearer ${token}` },
       });
   

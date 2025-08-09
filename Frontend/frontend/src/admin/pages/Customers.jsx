@@ -6,12 +6,12 @@ const AdminCustomers = () => {
   const [customers, setCustomers] = useState([]);
   const [search, setSearch] = useState("");
   const [selectedEmail, setSelectedEmail] = useState(null); // ✅ Track selected customer
-
+  const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || "http://localhost:8000";
   useEffect(() => {
     const fetchData = async () => {
       try {
         const token = localStorage.getItem("adminToken");
-        const res = await axios.get("/api/admin/customers", {
+        const res = await axios.get(`${BACKEND_URL}/api/admin/customers`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         setCustomers(res.data);

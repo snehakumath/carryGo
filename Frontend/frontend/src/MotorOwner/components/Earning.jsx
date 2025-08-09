@@ -26,12 +26,12 @@ const Earnings = () => {
   const [chartDataCity, setChartDataCity] = useState([]);
   const [chartDataVehicle, setChartDataVehicle] = useState([]);
   const [transporterEmail, setTransporterEmail] = useState(null);
-
+  const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || "http://localhost:8000";
   useEffect(() => {
     const fetchUserEmail = async () => {
       try {
         const response = await axios.get(
-          "http://localhost:8000/booking/user/me",
+          `${BACKEND_URL}/booking/user/me`,
           { withCredentials: true }
         );
         setTransporterEmail(response.data.email);
@@ -47,7 +47,7 @@ const Earnings = () => {
 
     axios
       .get(
-        `http://localhost:8000/api/payments/completed-orders/${transporterEmail}`
+        `${BACKEND_URL}/api/payments/completed-orders/${transporterEmail}`
       )
       .then((res) => {
         const orders = Array.isArray(res.data) ? res.data : [];

@@ -6,7 +6,7 @@ const ProtectedRoute = ({ children }) => {
   const [auth, setAuth] = useState(null);
 
   useEffect(() => {
-    axios.get('http://localhost:8000/api/admin/check-auth', {
+    axios.get(`${BACKEND_URL}/api/admin/check-auth`, {
       withCredentials: true
     }).then(res => {
       if (res.data.authenticated) {

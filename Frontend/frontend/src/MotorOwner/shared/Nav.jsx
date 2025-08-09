@@ -8,7 +8,7 @@ function Nav() {
   const [loading, setLoading] = useState(true);
   const [isNotifOpen, setIsNotifOpen] = useState(false);
   const [notifications, setNotifications] = useState([]);
-
+  const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || "http://localhost:8000";
   // useEffect(() => {
   //   const token = localStorage.getItem("token");
   //   if (!token) {
@@ -33,7 +33,7 @@ function Nav() {
   // }, []);
 
   useEffect(() => {
-    fetch("http://localhost:8000/auth/status", {
+    fetch(`${BACKEND_URL}/auth/status`, {
       method: "GET",
       credentials: "include", // include cookies
     })

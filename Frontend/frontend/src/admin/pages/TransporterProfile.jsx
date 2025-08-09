@@ -12,13 +12,13 @@ const TransporterProfile = ({ email }) => {
     const fetchData = async () => {
       try {
         const token = localStorage.getItem("adminToken");
-        const res1 = await axios.get("/api/admin/transporters", {
+        const res1 = await axios.get(`${BACKEND_URL}/api/admin/transporters`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         const user = res1.data.find((u) => u.email === email);
         setTransporter(user);
 
-        const res2 = await axios.get(`/api/admin/transporter-bookings/${email}`, {
+        const res2 = await axios.get(`${BACKEND_URL}/api/admin/transporter-bookings/${email}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         setBookings(res2.data);
@@ -33,7 +33,7 @@ const TransporterProfile = ({ email }) => {
   const handleToggleStatus = async (id) => {
     try {
       const token = localStorage.getItem("adminToken");
-      const res = await axios.patch(`/api/admin/toggle-user-status/${id}`, {}, {
+      const res = await axios.patch(`${BACKEND_URL}/api/admin/toggle-user-status/${id}`, {}, {
         headers: { Authorization: `Bearer ${token}` },
       });
   

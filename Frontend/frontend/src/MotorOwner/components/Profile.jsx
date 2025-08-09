@@ -23,7 +23,7 @@ const Profile = () => {
 
   useEffect(() => {
     axios
-      .get("/api/profile", { withCredentials: true })
+      .get(`${BACKEND_URL}/api/profile`, { withCredentials: true })
       .then((response) => {
         if (response.data.success) {
           const userData = response.data.user;
@@ -60,7 +60,7 @@ const Profile = () => {
   
   const fetchOrders = (email) => {
     axios
-      .get(`http://localhost:8080/booking/delivered-orders/${email}`, { withCredentials: true })
+      .get(`${BACKEND_URL}/booking/delivered-orders/${email}`, { withCredentials: true })
       .then((response) => {
         console.log("Fetched orders full response:", response);
         console.log("Fetched orders data:", response.data);
@@ -75,7 +75,7 @@ const Profile = () => {
   const fetchStats = async (email) => {
     console.log("fetchStats",email);
     try {
-      const res = await axios.get(`/booking/stats/${email}`);
+      const res = await axios.get(`${BACKEND_URL}/booking/stats/${email}`);
       console.log("response",res);
       setStats(res.data);
     } catch (err) {
@@ -104,7 +104,7 @@ const Profile = () => {
     if (profilePic) data.append("profilePicture", profilePic);
 
     try {
-      const response = await axios.put("/api/profile", data, {
+      const response = await axios.put(`${BACKEND_URL}/api/profile`, data, {
         headers: { "Content-Type": "multipart/form-data" },
         withCredentials: true,
       });
@@ -124,7 +124,7 @@ const Profile = () => {
   // };
   
   const handleLogout = () => {
-      axios.post("http://localhost:8000/logout", {}, { withCredentials: true })
+      axios.post(`${BACKEND_URL}/logout`, {}, { withCredentials: true })
         .then(() => {
           window.location.href = "/login"; // redirect to login
         })

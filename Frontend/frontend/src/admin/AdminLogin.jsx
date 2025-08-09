@@ -8,7 +8,7 @@ const AdminLogin = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
-
+  const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || "http://localhost:8000";
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -16,7 +16,7 @@ const AdminLogin = () => {
 
     try {
       const res = await axios.post(
-        'http://localhost:8000/api/admin/login',
+        `${BACKEND_URL}/api/admin/login`,
         { email, password },
         { withCredentials: true } // 🔥 necessary for cookies
       );
