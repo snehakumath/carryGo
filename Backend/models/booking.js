@@ -95,6 +95,29 @@ const bookingSchema = new mongoose.Schema({
     match: [/.+@.+\..+/, "Please provide a valid email address"],
     default: null,
   },
+  pickup_coords: {
+    type: {
+      type: String,
+      enum: ['Point'],
+      default: 'Point',
+    },
+    coordinates: {
+      type: [Number], // [lng, lat]
+      index: '2dsphere',
+    },
+  },
+  dropoff_coords: {
+    type: {
+      type: String,
+      enum: ['Point'],
+      default: 'Point',
+    },
+    coordinates: {
+      type: [Number],
+      index: '2dsphere',
+    },
+  },
+  
 }, { timestamps: true });
 
 module.exports = mongoose.model("Booking", bookingSchema);

@@ -33,6 +33,7 @@ const Booking = () => {
           .then((res) => {
             console.log("Trucks API Response:", res.data);
             if (Array.isArray(res.data)) {
+              console.log("res.data",res.data);
               const available = res.data.filter(truck => truck.availability_status === true);
               setAvailableTrucks(available);
               const busy = res.data.filter(truck => truck.availability_status !== true);
@@ -161,19 +162,20 @@ const Booking = () => {
     }
   };
   
-  const handleAssignTruck = async (orderId, selectedTruckId) => {
+  const handleAssignTruck = async (orderId, selectedTruckId,truck_shared) => {
     if (!selectedTruckId) {
       alert("Please select a truck before marking as done.");
       return;
     }
   
     try {
-      console.log(orderId,selectedTruckId);
+      console.log(orderId,selectedTruckId,truck_shared);
       const response = await axios.post(
         "http://localhost:8000/booking/assign-truck",
         {
           booking_id: orderId,
           vehicle_id: selectedTruckId,
+          truck_shared:truck_shared,
         },
         { headers: { "Content-Type": "application/json" } }
       );
@@ -191,8 +193,8 @@ const Booking = () => {
       const updatedTrucks = await axios.get(
         `http://localhost:8000/booking/trucks/${transporterEmail}`
       );
-      const available = updatedTrucks.data.filter(truck => truck.availability_status === true);
-      const busy = updatedTrucks.data.filter(truck => truck.availability_status !== true);
+      const available = updatedTrucks.data.filter(truck => truck.availability_status === true );
+      const busy = updatedTrucks.data.filter(truck => truck.availability_status !== true );
       setAvailableTrucks(available);
       setBusyTrucks(busy);
   
@@ -273,6 +275,13 @@ const Booking = () => {
               <p className="font-medium text-gray-800">Order #{order._id}</p>
               <p className="text-gray-600">Pickup: {order.pickup_loc}</p>
               <p className="text-gray-600">Dropoff: {order.dropoff_loc}</p>
+              <p className="text-gray-600">Dropoff: {order.pickup_date}</p>
+              <p className="text-sm text-gray-500">
+                Sharing: <span className={order.is_shared ? "text-green-700 font-semibold" : "text-red-700 font-semibold"}>
+                  {order.is_shared ? "Allowed" : "Not Allowed"}
+                </span>
+              </p>
+
               <input
                 type="number"
                 placeholder="Enter bid amount (₹)"
@@ -343,7 +352,7 @@ const Booking = () => {
       </select>
 
               <button
-                onClick={() => handleAssignTruck(order._id, selectedVehicles[order._id])}
+                onClick={() => handleAssignTruck(order._id, selectedVehicles[order._id],order.is_shared)}
                 className="bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-lg mt-3 w-full"
               >
                 Assign Truck

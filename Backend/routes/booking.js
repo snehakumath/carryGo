@@ -44,8 +44,10 @@ router.post("/process", async (req, res) => {
     phone,
     email,
     is_shared,
+    pickup_coords,
+  dropoff_coords,
   } = req.body;
-
+console.log("is shared",is_shared);
   try {
     // Create and save booking
     const newBooking = new Booking({
@@ -59,6 +61,15 @@ router.post("/process", async (req, res) => {
       phone,
       email,
       is_shared,
+      pickup_coords: {
+        type: 'Point',
+        coordinates: [pickup_coords.lng, pickup_coords.lat],
+      },
+      dropoff_coords: {
+        type: 'Point',
+        coordinates: [dropoff_coords.lng, dropoff_coords.lat],
+      },
+      
     });
  // console.log("Booking",newBooking);
     await newBooking.save();
@@ -80,11 +91,35 @@ router.post("/process", async (req, res) => {
     });
   }
 });
+router.get("/similar-routes/:bookingId", async (req, res) => {
+  const booking = await Booking.findById(req.params.bookingId);
+  if (!booking) return res.status(404).json({ error: "Booking not found" });
+
+  const MAX_DISTANCE_METERS = 20000; // 20km
+
+  const similarBookings = await Booking.find({
+    _id: { $ne: booking._id }, // Exclude current
+    pickup_coords: {
+      $near: {
+        $geometry: booking.pickup_coords,
+        $maxDistance: MAX_DISTANCE_METERS,
+      },
+    },
+    dropoff_coords: {
+      $near: {
+        $geometry: booking.dropoff_coords,
+        $maxDistance: MAX_DISTANCE_METERS,
+      },
+    },
+  });
+
+  res.json(similarBookings);
+});
 
 
 router.get("/goods", async (req, res) => {
   try {
-    const goods = await Booking.find({}, "goods_type pickup_loc dropoff_loc email transporter_email status vehicle_id pickup_date bid_status")
+    const goods = await Booking.find({}, "goods_type pickup_loc dropoff_loc email transporter_email status vehicle_id pickup_date bid_status is_shared")
     .populate('transporter_email', 'email'); // Fetch relevant fields
     // console.log("goods details",goods);
     res.json(goods);
@@ -155,6 +190,7 @@ router.get("/orders", async (req, res) => {
 
 //fetch transporter and vehicle detail for customer
 router.get('/:order_id', async (req, res) => {
+  console.log("2");
   try {
     const booking = await Booking.findOne({ order_id: req.params.order_id }).populate('vehicle_id');
     if (!booking) return res.status(404).send('Booking not found');
@@ -253,6 +289,7 @@ router.post("/orders/reject", async (req, res) => {
 
 // ✅ Get All Pending Orders (Only Show Unassigned Orders or Assigned to Logged-in Transporter)
 router.get("/orders/:transporterEmail", async (req, res) => {
+  console.log("hiittt");
   try {
       const transporterEmail = req.query.email; // Get the transporter's email from query params
       const orders = await Booking.find({
@@ -261,7 +298,7 @@ router.get("/orders/:transporterEmail", async (req, res) => {
               { transporter_email: transporterEmail } // Show only orders assigned to this transporter
           ]
       });
-
+     console.log("ORders",orders);
       res.json(orders);
   } catch (error) {
       console.error("Error fetching orders:", error);
@@ -289,7 +326,7 @@ router.get("/trucks/:email", async (req, res) => {
     try {
         const trucks = await Vehicle.find(
           { email: email },
-            "vehicle_id registration_number vehicle_type length height availability_status order_completed capacity vehicle_number"
+            "vehicle_id registration_number vehicle_type length height availability_status order_completed capacity vehicle_number truck_shared"
         );
         res.json(trucks);
     } catch (error) {
@@ -372,7 +409,7 @@ router.put("/orders/accept/:orderId", async (req, res) => {
 
 router.post("/assign-truck",async (req, res) => {
   try {
-    const { booking_id, vehicle_id } = req.body;
+    const { booking_id, vehicle_id , truck_shared } = req.body;
     if (!booking_id || !vehicle_id) {
       return res.status(400).json({ message: "Booking ID and Vehicle ID are required." });
     }
@@ -384,28 +421,42 @@ router.post("/assign-truck",async (req, res) => {
       {status:"Assigned"},
       { new: true }
     );
-    
+    console.log("Update Booking",updatedBooking);
 
     if (!updatedBooking) {
       return res.status(404).json({ message: "Booking not found" });
     }
 
     // Update vehicle availability
-    const updatedVehicle = await Vehicle.findByIdAndUpdate(
-      vehicle_id,
-      { availability_status: false },
-      { new: true }
-    );
-    
-
-    if (!updatedVehicle) {
+    // const updatedVehicle = await Vehicle.findByIdAndUpdate(
+    //   vehicle_id,
+    //   { availability_status: false },
+    //   { new: true }
+    // );
+    const vehicle = await Vehicle.findById(vehicle_id);
+    if (!vehicle) {
       return res.status(404).json({ message: "Vehicle not found" });
     }
+    vehicle.assigned_bookings.push(booking_id);
+    vehicle.truck_shared = truck_shared;
+    if (!vehicle) {
+      return res.status(404).json({ message: "Vehicle not found" });
+    }
+    if (truck_shared) {
+      // If shared and now 2 bookings, mark unavailable
+      if (vehicle.assigned_bookings.length >= 2) {
+        vehicle.availability_status = false;
+      }
+    } else {
+      // Not shared => mark unavailable immediately
+      vehicle.availability_status = false;
+    }
 
+    await vehicle.save();
     res.status(200).json({
       message: "Truck assigned successfully",
       updatedBooking,
-      updatedVehicle,
+       vehicle,
     });
   } catch (error) {
     console.error("Error assigning truck:", error);
@@ -462,6 +513,7 @@ router.put("/vehicles/make-available/:id", async (req, res) => {
     }
 
     vehicle.availability_status = true;
+    vehicle.truck_shared=false;
     await vehicle.save();
 
     const order = await Booking.findOne({
@@ -473,6 +525,9 @@ router.put("/vehicles/make-available/:id", async (req, res) => {
       order.order_completed = true;
       order.status = "Completed";
       await order.save();
+      vehicle.assigned_bookings = vehicle.assigned_bookings.filter(
+        (bookingId) => bookingId.toString() !== order._id.toString()
+      );
     }
 
     res.status(200).json({
@@ -595,7 +650,7 @@ router.get("/stats/:email", async (req, res) => {
     if (!transporter) {
       return res.status(404).json({ error: "Transporter not found with this email" });
     }
-   console.log(",,,",transporter,email);
+  // console.log(",,,",transporter,email);
     // Step 2: Use transporter._id for booking stats
     const totalResponses = await Booking.countDocuments({
       transporter_email: transporter._id,

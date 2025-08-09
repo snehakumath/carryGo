@@ -9,6 +9,7 @@ const GoodsTracking = () => {
   const [userEmail, setUserEmail] = useState(null);
   const [isPaymentDone, setIsPaymentDone] = useState(false);
   const [assignedOrder, setAssignedOrder] = useState(null);
+  const [availableToShare, setAvailableToShare] = useState([]);
 
   
   useEffect(() => {
@@ -92,7 +93,38 @@ const GoodsTracking = () => {
   }, [selectedGood]);
   
   
+  const fetchGoods = async () => {
+    try {
+      const response = await axios.get("http://localhost:8000/booking/goods");
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
   
+      const filteredOrders = response.data.filter(order => {
+        const orderDate = new Date(order.pickup_date);
+        orderDate.setHours(0, 0, 0, 0);
+        return (
+          order.email === userEmail &&
+          orderDate >= today &&
+          order.status !== 'Completed'
+        );
+      });
+  
+      const othersWithSameRoute = response.data.filter(order => {
+        const orderDate = new Date(order.pickup_date);
+        orderDate.setHours(0, 0, 0, 0);
+        return (
+          order.email !== userEmail &&
+          orderDate >= today &&
+          order.status !== 'Completed'
+        );
+      });
+  
+      setGoodsData(filteredOrders);
+      setAvailableToShare(othersWithSameRoute);
+    } catch (error) {
+      console.error("Error fetching goods data:", error);
+    }
+  };
   const handlePayment = async (order,bid) => {
     console.log(order);
     console.log("Bid handlePayment",bid);
