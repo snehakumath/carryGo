@@ -16,7 +16,7 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-
+  console.log("LOGIN HIT");
      try {
     //   const response = await fetch('http://localhost:8000/login', {
     //     method: 'POST',
@@ -24,6 +24,7 @@ const Login = () => {
     //       'Content-Type': 'application/json',
     //     },
     //     body: JSON.stringify({ email, password, user_type }),
+  
     //   });
     const response = await fetch(`${BACKEND_URL}/login`, {
       method: 'POST',

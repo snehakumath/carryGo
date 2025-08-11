@@ -67,9 +67,6 @@ app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, '../Frontend/frontend/dist', 'index.html'));
 });
 
-// app.get("/", (req, res) => {
-//     return res.send("Welcome to CarryGo API");
-// });
 
 
 server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
