@@ -49,7 +49,7 @@ app.use(express.urlencoded({ extended: true }));
 // Serve static frontend files
 app.use(express.static(path.join(__dirname, '../Frontend/frontend/dist')));
 
-mongoose.connect(process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/carryGo')
+mongoose.connect(process.env.MONGO_URI || process.env.MONGO_LOCAL_URI )
     .then(() => console.log('MongoDB connected'))
     .catch(err => console.log(err));
 
