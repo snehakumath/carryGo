@@ -57,7 +57,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // Serve static frontend files
 app.use(express.static(path.join(__dirname, '../Frontend/frontend/dist')));
-
+console.log("URL",MONGO_URI);
 mongoose.connect(process.env.MONGO_URI || process.env.MONGO_LOCAL_URI )
     .then(() => console.log('MongoDB connected'))
     .catch(err => console.log(err));
@@ -78,6 +78,6 @@ app.get('*', (req, res) => {
 
 
 
-server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+server.listen(PORT,'0.0.0.0', () => console.log(`Server running on port ${PORT}`));
 
 // module.exports = { app, server, io };
