@@ -28,7 +28,8 @@ const PORT = process.env.PORT || 8000;
 
 const allowedOrigins = [
     "http://localhost:5173", // local frontend
-    process.env.FRONTEND_URL  // deployed frontend
+    process.env.FRONTEND_URL , // deployed frontend
+    "https://carry-go-frontend-px5d68jgi-snehas-projects-c8d1af72.vercel.app"
   ];
   
   app.use(cors({

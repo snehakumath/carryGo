@@ -6,7 +6,8 @@ const Bid = require("../models/bidding"); // Import Bid model
 let io;
 const allowedOrigins = [
     "http://localhost:5173",
-    process.env.FRONTEND_URL
+    process.env.FRONTEND_URL,
+     "https://carry-go-frontend-px5d68jgi-snehas-projects-c8d1af72.vercel.app"
   ];
 const initializeSocket = (server) => {
 
