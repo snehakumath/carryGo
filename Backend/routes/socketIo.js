@@ -12,11 +12,17 @@ const initializeSocket = (server) => {
 
     io = new Server(server, {
         cors: {
-            origin: allowedOrigins, // Update to your client URL
-            methods: ["GET", "POST"],
-            credentials:true
-        },
-    });
+          origin: function (origin, callback) {
+            if (!origin || allowedOrigins.includes(origin)) {
+              callback(null, true);
+            } else {
+              callback(new Error("Not allowed by CORS"));
+            }
+          },
+          methods: ["GET", "POST"],
+          credentials: true
+        }
+      });
 
     io.on("connection", (socket) => {
         console.log(`✅ A user connected: ${socket.id}`);
