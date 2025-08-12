@@ -11,7 +11,6 @@ const Login = () => {
   const navigate = useNavigate(); 
   const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:8000";
   console.log("Backend URL:", import.meta.env.VITE_BACKEND_URL);
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
