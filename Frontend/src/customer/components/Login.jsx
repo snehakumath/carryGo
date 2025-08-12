@@ -36,8 +36,10 @@ const Login = () => {
         console.log("2nd ",data.user_type === 'customer');
         if (data.user_type === 'customer') {
           console.log("HEllo customer");
+            navigate('/home', { replace: true });
           navigate('/', { replace: true });
         } else if (data.user_type === 'transporter') {
+          console.log("Owner")
           navigate('/owner', { replace: true });
         }
       } else {
