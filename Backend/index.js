@@ -27,30 +27,30 @@ const io = initializeSocket(server);
 const PORT = process.env.PORT || 8000;
 
 const allowedOrigins = [
-    "http://localhost:5173", // local frontend
-    process.env.FRONTEND_URL , // deployed frontend
-    "https://carry-go-frontend-px5d68jgi-snehas-projects-c8d1af72.vercel.app"
-  ];
-  
-  app.use(cors({
-    origin: function (origin, callback) {
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error("Not allowed by CORS"));
-      }
-    },
-    methods: ["GET", "POST"],
-    credentials: true
-  }));
-  // app.use(
-  //   cors({
-  //     origin: allowedOrigins,
-  //     methods: ["GET", "POST"],
-  //     credentials: true
-  //   })
-  // );
-  
+  "http://localhost:5173",       // local frontend
+  process.env.FRONTEND_URL,      // production frontend from env
+  /\.vercel\.app$/               // matches ALL vercel preview deployments
+];
+
+app.use(cors({
+  origin: function (origin, callback) {
+    if (!origin) return callback(null, true); // allow non-browser requests (e.g. curl, Postman)
+
+    const isAllowed = allowedOrigins.some(o =>
+      o instanceof RegExp ? o.test(origin) : o === origin
+    );
+
+    if (isAllowed) {
+      callback(null, true);
+    } else {
+      console.error(`❌ CORS blocked for origin: ${origin}`);
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  methods: ["GET", "POST"],
+  credentials: true
+}));
+
 app.use(express.json());
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));

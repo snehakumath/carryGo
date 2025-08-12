@@ -7,16 +7,21 @@ let io;
 const allowedOrigins = [
     "http://localhost:5173",
     process.env.FRONTEND_URL,
-     "https://carry-go-frontend-px5d68jgi-snehas-projects-c8d1af72.vercel.app"
+     /\.vercel\.app$/
   ];
 const initializeSocket = (server) => {
 
     io = new Server(server, {
         cors: {
           origin: function (origin, callback) {
-            if (!origin || allowedOrigins.includes(origin)) {
+            if (!origin) return callback(null, true);
+            const isAllowed = allowedOrigins.some(o =>
+              o instanceof RegExp ? o.test(origin) : o === origin
+            );
+            if (isAllowed) {
               callback(null, true);
             } else {
+              console.error(`❌ Socket.IO CORS blocked for origin: ${origin}`);
               callback(new Error("Not allowed by CORS"));
             }
           },
@@ -24,6 +29,8 @@ const initializeSocket = (server) => {
           credentials: true
         }
       });
+      
+    
 
     io.on("connection", (socket) => {
         console.log(`✅ A user connected: ${socket.id}`);
