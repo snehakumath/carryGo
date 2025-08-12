@@ -6,9 +6,13 @@ const Bid = require("../models/bidding"); // Import Bid model
 let io;
 
 const initializeSocket = (server) => {
+    const allowedOrigins = [
+        "http://localhost:5173",
+        process.env.FRONTEND_URL
+      ];
     io = new Server(server, {
         cors: {
-            origin: "http://localhost:5173", // Update to your client URL
+            origin: allowedOrigins, // Update to your client URL
             methods: ["GET", "POST"],
         },
     });

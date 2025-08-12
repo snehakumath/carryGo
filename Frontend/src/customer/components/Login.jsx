@@ -1,5 +1,3 @@
-
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom'; 
 
@@ -12,20 +10,13 @@ const Login = () => {
 
   const navigate = useNavigate(); 
   const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:8000";
+  console.log("Backend URL:", import.meta.env.VITE_BACKEND_URL);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
   console.log("LOGIN HIT");
      try {
-    //   const response = await fetch('http://localhost:8000/login', {
-    //     method: 'POST',
-    //     headers: {
-    //       'Content-Type': 'application/json',
-    //     },
-    //     body: JSON.stringify({ email, password, user_type }),
-  
-    //   });
     const response = await fetch(`${BACKEND_URL}/login`, {
       method: 'POST',
       headers: {
@@ -38,7 +29,6 @@ const Login = () => {
       const data = await response.json();
       if (response.ok) {
         console.log('Login successful:', data);
-
         if (typeof window !== 'undefined') {
           //localStorage.setItem('token', data.accessToken); // Ensure correct key
           console.log("Type of window ", typeof window);
@@ -139,8 +129,7 @@ const Login = () => {
             <button
               type="submit"
               className={`w-full ${loading ? 'bg-gray-500' : 'bg-blue-500'} text-white py-2 px-4 rounded-md hover:bg-blue-600 transition duration-200`}
-              disabled={loading}
-            >
+              disabled={loading}>
               {loading ? 'Logging in...' : 'Login'}
             </button>
           </div>

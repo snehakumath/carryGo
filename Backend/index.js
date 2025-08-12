@@ -37,10 +37,6 @@ const allowedOrigins = [
       credentials: true
     })
   );
-// app.use(cors({
-//     origin: "http://localhost:5173", // Update with your frontend URL
-//     credentials: true, // Allow cookies to be sent
-//   }));
   
 app.use(express.json());
 app.use(cookieParser());
