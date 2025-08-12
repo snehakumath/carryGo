@@ -33,6 +33,7 @@ const Login = () => {
           console.log("Type of window ", typeof window);
         }
         if (data.user_type === 'customer') {
+          console.log("HEllo customer");
           navigate('/', { replace: true });
         } else if (data.user_type === 'transporter') {
           navigate('/owner', { replace: true });
