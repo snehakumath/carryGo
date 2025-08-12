@@ -10,7 +10,7 @@ const Login = () => {
 
   const navigate = useNavigate(); 
   const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:8000";
-  console.log("Backend URL:", import.meta.env.VITE_BACKEND_URL);
+  //console.log("Backend URL:", import.meta.env.VITE_BACKEND_URL);
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -24,7 +24,7 @@ const Login = () => {
       credentials: 'include', // 🔥 This is required to store cookies!
       body: JSON.stringify({ email, password, user_type }),
     });
-    
+    console.log("RES",response);
       const data = await response.json();
       if (response.ok) {
         console.log('Login successful:', data);
@@ -37,7 +37,7 @@ const Login = () => {
         if (data.user_type === 'customer') {
           console.log("HEllo customer");
             navigate('/home', { replace: true });
-          navigate('/', { replace: true });
+          //navigate('/', { replace: true });
         } else if (data.user_type === 'transporter') {
           console.log("Owner")
           navigate('/owner', { replace: true });
