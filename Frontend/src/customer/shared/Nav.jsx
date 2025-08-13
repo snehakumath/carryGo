@@ -18,8 +18,8 @@ function Nav() {
 
   // const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:8000";
   console.log("Auth from nav",authStatus);
+  const isLoggedIn = authStatus?.loggedIn || false;
   const user = authStatus?.user || null;
-  const isLoggedIn=authStatus.loggedIn;
   console.log("loggedin , user",isLoggedIn,user);
   useEffect(() => {
     const handleScroll = () => {

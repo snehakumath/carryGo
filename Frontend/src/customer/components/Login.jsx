@@ -29,7 +29,7 @@ const Login = () => {
       });
 
       const data = await response.json();
-
+     console.log("Data for auth",data.email,data.user_type);
       if (response.ok) {
         console.log('Login successful:', data);
         setAuthStatus({
@@ -39,6 +39,14 @@ const Login = () => {
             user_type: data.user_type,
           },
         });
+        localStorage.setItem("authStatus", JSON.stringify({
+          loggedIn: true,
+          user: {
+            email: data.email,
+            user_type: data.user_type,
+          },
+        }));
+        
         if (typeof window !== 'undefined') {
           //localStorage.setItem('token', data.accessToken); // Ensure correct key
           console.log("Type of window ", typeof window);
