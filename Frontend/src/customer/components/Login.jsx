@@ -16,6 +16,7 @@ const Login = () => {
     setLoading(true);
   //console.log("LOGIN HIT");
      try {
+      console.log("email,password,user_type",email,password,user_type);
     const response = await fetch(`${BACKEND_URL}/login`, {
       method: 'POST',
       headers: {

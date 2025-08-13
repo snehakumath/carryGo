@@ -5,7 +5,7 @@ require('dotenv').config();
 const secret = process.env.JWT_SECRET;
 
 router.get('/status', (req, res) => {
-  console.log("auth status",req.cookies);
+  console.log("auth status",req.headers.cookies);
   const token = req.cookies?.accessToken || req.headers.authorization?.split(' ')[1];
   console.log("Token",token);
   if (!token) {

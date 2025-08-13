@@ -43,7 +43,7 @@ router.post('/login', async (req, res) => {
     const refreshToken = createTokenForUser({ email, user_type });
 
     // Set tokens in cookies
-    `console.log("NODE_ENV =", process.env.NODE_ENV);
+    console.log("NODE_ENV =", process.env.NODE_ENV);
 const isProduction = process.env.NODE_ENV === 'production';
 
 res.cookie('accessToken', accessToken, {
@@ -60,7 +60,7 @@ res.cookie('refreshToken', refreshToken, {
   sameSite: isProduction ? 'none' : 'lax',
   secure: isProduction,
   path: '/',
-});`
+});
 
 
     // res.cookie('accessToken', accessToken, { httpOnly: true, maxAge: 3600000 });
