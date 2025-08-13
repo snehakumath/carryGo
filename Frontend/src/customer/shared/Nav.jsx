@@ -17,21 +17,6 @@ function Nav() {
 
   // const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:8000";
 
-  // useEffect(() => {
-  //   setLoading(true); // Optional
-  //   fetch(`${BACKEND_URL}/auth/status`, {
-  //     method: "GET",
-  //     credentials: 'include',
-  //   })
-  //     .then((res) => res.ok ? res.json() : Promise.reject())
-  //     .then((data) => {
-  //       setIsLoggedIn(data.loggedIn);
-  //       setUser(data.user);
-  //     })
-  //     .catch(() => setIsLoggedIn(false))
-  //     .finally(() => setLoading(false));
-  // }, [location]);
-  // const isLoggedIn = authStatus?.loggedIn || false;
   const user = authStatus?.user || null;
   console.log("loggedin , user",isLoggedIn,user);
   useEffect(() => {

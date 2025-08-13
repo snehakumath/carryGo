@@ -24,6 +24,11 @@ const app = express();
 const server = http.createServer(app);
 const io = initializeSocket(server);
 
+
+app.use(express.json());
+app.use(cookieParser());
+app.use(express.urlencoded({ extended: true }));
+
 const PORT = process.env.PORT || 8000;
 console.log("FRONTEND_URL:", process.env.FRONTEND_URL);
 const allowedOrigins = [
@@ -51,9 +56,6 @@ app.use(cors({
   credentials: true
 }));
 
-app.use(express.json());
-app.use(cookieParser());
-app.use(express.urlencoded({ extended: true }));
 
 // Serve static frontend files
 app.use(express.static(path.join(__dirname, '../Frontend/dist')));
