@@ -3,10 +3,11 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { useEffect } from "react";
 
-useEffect(()=>{
-console.log("Hello from Home");
-  });
 function Home() {
+  
+useEffect(()=>{
+  console.log("Hello from Home");
+    });
   return (
     <div className="bg-white text-black">
       {/* Hero Section */}
