@@ -14,7 +14,7 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-  console.log("LOGIN HIT");
+  //console.log("LOGIN HIT");
      try {
     const response = await fetch(`${BACKEND_URL}/login`, {
       method: 'POST',
