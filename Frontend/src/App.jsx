@@ -1,4 +1,3 @@
-
 import React from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import Home from "./customer/components/Home";
@@ -14,25 +13,26 @@ import Profile from "./customer/components/Profile";
 import Payment from "./customer/components/Payment";
 import ProtectedRoute from "./customer/components/ProtectedRoute";
 import Notification from "./customer/shared/Notification";
-import { ApiProvider } from "./context/ApiContext";
+import { ApiProvider, useApi } from "./context/ApiContext";
 import AdminLogin from "./admin/AdminLogin";
 import AdminSignup from "./admin/AdminSignup";
 import AdminDashboard from "./admin/AdminDashboard";
 import AdminProtectedRoute from "./admin/pages/ProtectedRoute";
 
-//import AdminDashboard from "./admin/AdminDashboard";
+function AppRoutes() {
+  const { authStatus, loading } = useApi();
 
-function App() {
-  const token = localStorage.getItem("token");
+  if (loading) return <div>Loading...</div>; // Wait until auth check completes
+
+  const isLoggedIn = authStatus?.loggedIn;
 
   return (
-    <ApiProvider>
     <Router>
       <Routes>
-        {/* Redirect "/" based on login status */}
-        <Route path="/" element={token ? <Navigate to="/home" replace /> : <Navigate to="/login" replace />} />
+        {/* Root redirect */}
+        <Route path="/" element={isLoggedIn ? <Navigate to="/home" replace /> : <Navigate to="/login" replace />} />
 
-        {/* Public Routes */}
+        {/* Public routes */}
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
 
@@ -45,35 +45,95 @@ function App() {
             <Route path="aboutus" element={<AboutUs />} />
             <Route path="help" element={<Help />} />
             <Route path="update-goods" element={<UpdateGoods />} />
-           <Route path="profile" element={<Profile/>} /> 
-            <Route path="payment" element={<Payment/>} />
-            <Route path="/notifications" element={<Notification/>}/>
+            <Route path="profile" element={<Profile />} />
+            <Route path="payment" element={<Payment />} />
+            <Route path="notifications" element={<Notification />} />
           </Route>
         </Route>
 
-        {/* Protected Owner Route */}
+        {/* Owner */}
         <Route element={<ProtectedRoute />}>
           <Route path="/owner/*" element={<OwnerDashboard />} />
         </Route>
-       {/* Admin Auth Routes */}
-<Route path="/admin-login" element={<AdminLogin />} />
-<Route path="/admin-signup" element={<AdminSignup />} />
 
-{/* Admin Protected Routes */}
-<Route path="/admin/*" element={
-  <AdminProtectedRoute >
-    <AdminDashboard />
-  </AdminProtectedRoute>
-} />
-
-{/* <Route element={<AdminProtectedRoute />}>
-  <Route path="/admin/*" element={<AdminDashboard />} />
-</Route> */}
-
+        {/* Admin */}
+        <Route path="/admin-login" element={<AdminLogin />} />
+        <Route path="/admin-signup" element={<AdminSignup />} />
+        <Route path="/admin/*" element={
+          <AdminProtectedRoute>
+            <AdminDashboard />
+          </AdminProtectedRoute>
+        } />
       </Routes>
     </Router>
+  );
+}
+
+function App() {
+  return (
+    <ApiProvider>
+      <AppRoutes />
     </ApiProvider>
   );
 }
 
 export default App;
+
+
+// function App() {
+//   const token = localStorage.getItem("token");
+
+//   return (
+//     <ApiProvider>
+//     <Router>
+//       <Routes>
+//         {/* Redirect "/" based on login status */}
+//         <Route path="/" element={token ? <Navigate to="/home" replace /> : <Navigate to="/login" replace />} />
+
+//         {/* Public Routes */}
+//         <Route path="/login" element={<Login />} />
+//         <Route path="/signup" element={<Signup />} />
+
+//         {/* Protected Customer Routes */}
+//         <Route element={<ProtectedRoute />}>
+//           <Route path="/" element={<Layout />}>
+//             <Route index element={<Home />} />
+//             <Route path="home" element={<Home />} />
+//             <Route path="booking" element={<Booking />} />
+//             <Route path="aboutus" element={<AboutUs />} />
+//             <Route path="help" element={<Help />} />
+//             <Route path="update-goods" element={<UpdateGoods />} />
+//            <Route path="profile" element={<Profile/>} /> 
+//             <Route path="payment" element={<Payment/>} />
+//             <Route path="/notifications" element={<Notification/>}/>
+//           </Route>
+//         </Route>
+
+//         {/* Protected Owner Route */}
+//         <Route element={<ProtectedRoute />}>
+//           <Route path="/owner/*" element={<OwnerDashboard />} />
+//         </Route>
+//        {/* Admin Auth Routes */}
+// <Route path="/admin-login" element={<AdminLogin />} />
+// <Route path="/admin-signup" element={<AdminSignup />} />
+
+// {/* Admin Protected Routes */}
+// <Route path="/admin/*" element={
+//   <AdminProtectedRoute >
+//     <AdminDashboard />
+//   </AdminProtectedRoute>
+// } />
+
+// {/* <Route element={<AdminProtectedRoute />}>
+//   <Route path="/admin/*" element={<AdminDashboard />} />
+// </Route> */}
+
+//       </Routes>
+//     </Router>
+//     </ApiProvider>
+//   );
+// }
+
+// export default App;
+
+ 

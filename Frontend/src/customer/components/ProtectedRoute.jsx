@@ -1,10 +1,14 @@
-import React from "react";
-import { Navigate, Outlet } from "react-router-dom";
+import { Outlet, Navigate } from "react-router-dom";
+import { useApi } from "../../context/ApiContext";
 
 const ProtectedRoute = () => {
-  const token = localStorage.getItem("token"); // Check authentication
+  const { authStatus, loading } = useApi();
 
-  return token ? <Outlet /> : <Navigate to="/login" replace />;
+  if (loading) return <div>Loading...</div>; // Or spinner
+
+  if (!authStatus?.loggedIn) return <Navigate to="/login" replace />;
+
+  return <Outlet />;
 };
 
 export default ProtectedRoute;
