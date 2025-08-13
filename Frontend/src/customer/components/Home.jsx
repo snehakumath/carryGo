@@ -5,8 +5,7 @@ import { useEffect } from "react";
 
 useEffect(()=>{
 console.log("Hello from Home");
-  }
-,[]);
+  });
 function Home() {
   return (
     <div className="bg-white text-black">
