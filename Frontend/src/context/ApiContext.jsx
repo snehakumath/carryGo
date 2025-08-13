@@ -17,7 +17,9 @@ export const ApiProvider = ({ children }) => {
   const checkAuth = async () => {
     console.log("checkAuth");
     try {
-      const response = await API.get(`${BACKEND_URL}/auth/status`);
+      const response = await API.get(`${BACKEND_URL}/auth/status`, {
+        withCredentials: true
+      });      
       console.log("REs context checkAuth", response.data);
       setAuthStatus(response.data);
       return response.data;
