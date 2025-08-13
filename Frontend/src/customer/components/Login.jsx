@@ -73,22 +73,20 @@ const Login = () => {
       const data = await response.json();
 
       if (response.ok) {
-        console.log("Login successful:", data);
-
-        // ✅ Update context first
-        setAuthStatus({
-          loggedIn: true,
-          user: {
-            email: data.email,
-            user_type: data.user_type,
-          },
-        });
-
-        // ✅ Redirect after context updates
-        if (data.user_type === "customer") {
-          navigate("/home", { replace: true });
-        } else if (data.user_type === "transporter") {
-          navigate("/owner", { replace: true });
+        console.log('Login successful:', data);
+        if (typeof window !== 'undefined') {
+          //localStorage.setItem('token', data.accessToken); // Ensure correct key
+          console.log("Type of window ", typeof window);
+        }
+        console.log("1st ",data.user_type);
+        console.log("2nd ",data.user_type === 'customer');
+        if (data.user_type === 'customer') {
+          console.log("HEllo customer");
+            //navigate('/home', { replace: true });
+          navigate('/', { replace: true });
+        } else if (data.user_type === 'transporter') {
+          console.log("Owner")
+          navigate('/owner', { replace: true });
         }
       } else {
         setErrorMessage(data.message || "Invalid credentials. Please try again.");
