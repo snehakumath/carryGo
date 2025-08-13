@@ -56,7 +56,7 @@ app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
 
 // Serve static frontend files
-app.use(express.static(path.join(__dirname, '../Frontend/frontend/dist')));
+app.use(express.static(path.join(__dirname, '../Frontend/dist')));
 console.log("URL",process.env.MONGO_URI);
 mongoose.connect(process.env.MONGO_URI || process.env.MONGO_LOCAL_URI )
     .then(() => console.log('MongoDB connected'))
@@ -73,7 +73,7 @@ app.use('/api/admin',adminRotes);
 app.use('/', userRoute);
 
 app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, '../Frontend/frontend/dist', 'index.html'));
+    res.sendFile(path.join(__dirname, '../Frontend/dist', 'index.html'));
 });
 
 
