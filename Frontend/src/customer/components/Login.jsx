@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom'; 
+import { useApi } from "../../context/ApiContext";
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -9,51 +10,96 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate(); 
+  const { setAuthStatus } = useApi();
+
   const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:8000";
-  console.log("Backend URL:", import.meta.env.VITE_BACKEND_URL);
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault();
+  //   setLoading(true);
+  // //console.log("LOGIN HIT");
+  //    try {
+  //     console.log("email,password,user_type",email,password,user_type);
+  //   const response = await fetch(`${BACKEND_URL}/login`, {
+  //     method: 'POST',
+  //     headers: {
+  //       'Content-Type': 'application/json',
+  //     },
+  //     credentials: 'include', // 🔥 This is required to store cookies!
+  //     body: JSON.stringify({ email, password, user_type }),
+  //   });
+  //   console.log("RES",response);
+  //     const data = await response.json();
+  //     if (response.ok) {
+  //       console.log('Login successful:', data);
+  //       if (typeof window !== 'undefined') {
+  //         //localStorage.setItem('token', data.accessToken); // Ensure correct key
+  //         console.log("Type of window ", typeof window);
+  //       }
+  //       console.log("1st ",data.user_type);
+  //       console.log("2nd ",data.user_type === 'customer');
+  //       if (data.user_type === 'customer') {
+  //         console.log("HEllo customer");
+  //           navigate('/home', { replace: true });
+  //         //navigate('/', { replace: true });
+  //       } else if (data.user_type === 'transporter') {
+  //         console.log("Owner")
+  //         navigate('/owner', { replace: true });
+  //       }
+  //     } else {
+  //       setErrorMessage(data.message || 'Invalid credentials. Please try again.');
+  //     }
+  //   } catch (error) {
+  //     setErrorMessage('An error occurred. Please try again later.');
+  //     console.error('Login error:', error);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-  //console.log("LOGIN HIT");
-     try {
-      console.log("email,password,user_type",email,password,user_type);
-    const response = await fetch(`${BACKEND_URL}/login`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      credentials: 'include', // 🔥 This is required to store cookies!
-      body: JSON.stringify({ email, password, user_type }),
-    });
-    console.log("RES",response);
+
+    try {
+      const response = await fetch(`${BACKEND_URL}/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({ email, password, user_type }),
+      });
+
       const data = await response.json();
+
       if (response.ok) {
-        console.log('Login successful:', data);
-        if (typeof window !== 'undefined') {
-          //localStorage.setItem('token', data.accessToken); // Ensure correct key
-          console.log("Type of window ", typeof window);
-        }
-        console.log("1st ",data.user_type);
-        console.log("2nd ",data.user_type === 'customer');
-        if (data.user_type === 'customer') {
-          console.log("HEllo customer");
-            //navigate('/home', { replace: true });
-          navigate('/', { replace: true });
-        } else if (data.user_type === 'transporter') {
-          console.log("Owner")
-          navigate('/owner', { replace: true });
+        console.log("Login successful:", data);
+
+        // ✅ Update context first
+        setAuthStatus({
+          loggedIn: true,
+          user: {
+            email: data.email,
+            user_type: data.user_type,
+          },
+        });
+
+        // ✅ Redirect after context updates
+        if (data.user_type === "customer") {
+          navigate("/home", { replace: true });
+        } else if (data.user_type === "transporter") {
+          navigate("/owner", { replace: true });
         }
       } else {
-        setErrorMessage(data.message || 'Invalid credentials. Please try again.');
+        setErrorMessage(data.message || "Invalid credentials. Please try again.");
       }
     } catch (error) {
-      setErrorMessage('An error occurred. Please try again later.');
-      console.error('Login error:', error);
+      setErrorMessage("An error occurred. Please try again later.");
+      console.error("Login error:", error);
     } finally {
       setLoading(false);
     }
   };
-
   return (
     <div
       className="min-h-screen bg-cover bg-center flex items-center justify-center"
