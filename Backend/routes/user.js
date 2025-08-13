@@ -129,28 +129,29 @@ router.post('/refresh-token', (req, res) => {
 });
 
 
-// Logout route
+const isProduction = process.env.NODE_ENV === 'production';
+
 router.post('/logout', (req, res) => {
-  console.log("Logout");
- // On server logout route
- res.clearCookie('accessToken', {
-  httpOnly: true,
-  secure: isProduction,
-  sameSite: isProduction ? 'none' : 'lax',
-  path: '/'
-});
-res.clearCookie('refreshToken', {
-  httpOnly: true,
-  secure: isProduction,
-  sameSite: isProduction ? 'none' : 'lax',
-  path: '/'
-});
+  try {
+    res.clearCookie('accessToken', { 
+      httpOnly: true, 
+      secure: isProduction, 
+      sameSite: isProduction ? 'none' : 'lax', 
+      path: '/' 
+    });
+    res.clearCookie('refreshToken', { 
+      httpOnly: true, 
+      secure: isProduction, 
+      sameSite: isProduction ? 'none' : 'lax', 
+      path: '/' 
+    });
 
-  
-  return res.json({ success: true, loggedIn: false, user: null });
+    return res.json({ success: true, loggedIn: false, user: null });
+  } catch (err) {
+    console.error("Logout failed:", err);
+    return res.status(500).json({ success: false, message: "Logout failed" });
+  }
 });
-
-
 
 
 module.exports = router;
