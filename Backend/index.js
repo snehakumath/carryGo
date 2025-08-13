@@ -24,22 +24,15 @@ const app = express();
 const server = http.createServer(app);
 const io = initializeSocket(server);
 
-
-app.use(express.json());
-app.use(cookieParser());
-app.use(express.urlencoded({ extended: true }));
-
-const PORT = process.env.PORT || 8000;
-console.log("FRONTEND_URL:", process.env.FRONTEND_URL);
 const allowedOrigins = [
   "http://localhost:5173",       // local frontend
   process.env.FRONTEND_URL,      // production frontend from env
   /\.vercel\.app$/               // matches ALL vercel preview deployments
 ];
-
 app.use(cors({
   origin: function (origin, callback) {
-    if (!origin) return callback(null, true); // allow non-browser requests (e.g. curl, Postman)
+    console.log("Allowed Origins:", allowedOrigins);
+    if (!origin) return callback(null, true); // allow server-to-server
 
     const isAllowed = allowedOrigins.some(o =>
       o instanceof RegExp ? o.test(origin) : o === origin
@@ -52,9 +45,17 @@ app.use(cors({
       callback(new Error("Not allowed by CORS"));
     }
   },
-  methods: ["GET", "POST"],
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"], // allow OPTIONS
   credentials: true
 }));
+
+app.use(cookieParser());
+app.use(express.json());
+
+app.use(express.urlencoded({ extended: true }));
+
+const PORT = process.env.PORT || 8000;
+console.log("FRONTEND_URL:", process.env.FRONTEND_URL);
 
 
 // Serve static frontend files

@@ -2,7 +2,8 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import FeedbackForm from "./FeedbackForm";
-
+import { useApi } from "../../context/ApiContext";
+import { useNavigate } from "react-router-dom";
 const Profile = () => {
 
   const [user, setUser]  = useState(null);
@@ -11,7 +12,7 @@ const Profile = () => {
   const [feedbacks, setFeedbacks] = useState({});
 const [feedbackForm, setFeedbackForm] = useState({});
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:8000";
-
+   const { setAuthStatus } = useApi();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -21,6 +22,7 @@ const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:8000";
   });
   const [profilePic, setProfilePic] = useState(null);
   const [preview, setPreview] = useState("");
+  const navigate = useNavigate(); 
 
   useEffect(() => {
     axios
@@ -28,7 +30,6 @@ const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:8000";
       .then((response) => {
         if (response.data.success) {
           const userData = response.data.user;
-         // console.log("Response",response);
           setUser(userData);
           setFormData({
             name: userData.name,
@@ -38,13 +39,40 @@ const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:8000";
             address: userData.address,
           });
           setPreview(userData.profilePicture || "/Images/avatar.jpeg");
-
-          // Fetch orders for this user
           fetchOrders(userData.email);
         }
       })
-      .catch((err) => console.error("Error fetching profile:", err));
+      .catch((err) => {
+        console.error("Error fetching profile:", err);
+        if (err.response && err.response.status === 401) {
+          window.location.href = "/login";
+        }
+      });
   }, []);
+  
+  // useEffect(() => {
+  //   axios
+  //     .get(`${BACKEND_URL}/api/profile`, { withCredentials: true })
+  //     .then((response) => {
+  //       if (response.data.success) {
+  //         const userData = response.data.user;
+  //        // console.log("Response",response);
+  //         setUser(userData);
+  //         setFormData({
+  //           name: userData.name,
+  //           email: userData.email,
+  //           city: userData.city,
+  //           phone: userData.phone,
+  //           address: userData.address,
+  //         });
+  //         setPreview(userData.profilePicture || "/Images/avatar.jpeg");
+
+  //         // Fetch orders for this user
+  //         fetchOrders(userData.email);
+  //       }
+  //     })
+  //     .catch((err) => console.error("Error fetching profile:", err));
+  // }, []);
 
   const fetchOrders = async (email) => {
     try {
@@ -138,16 +166,17 @@ const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:8000";
   //     window.location.href = "/login";
   //   });
   // };
+const handleLogout = async () => {
+  try {
+    await axios.post(`${BACKEND_URL}/logout`, {}, { withCredentials: true });
+    setAuthStatus({ loggedIn: false, user: null }); // update Nav instantly
+    navigate("/login"); // use react-router navigation
+  } catch (err) {
+    console.error("Logout failed:", err);
+  }
+};
 
-  const handleLogout = () => {
-    axios.post(`${BACKEND_URL}/logout`, {}, { withCredentials: true })
-      .then(() => {
-        window.location.href = "/login"; // redirect to login
-      })
-      .catch((err) => {
-        console.error("Logout failed:", err);
-      });
-  };
+  
   
 
   if (!user) return <div className="text-white text-center mt-10">Loading...</div>;

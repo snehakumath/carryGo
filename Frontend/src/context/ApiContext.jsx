@@ -4,51 +4,43 @@ import API from "../utils/api.js";
 const ApiContext = createContext();
 
 export const ApiProvider = ({ children }) => {
-  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:8000";
+  const BACKEND_URL =
+    import.meta.env.VITE_BACKEND_URL || "http://localhost:8000";
 
-  // Load from localStorage first so refresh doesn't reset login
-  const storedAuth = localStorage.getItem("authStatus");
-  const [authStatus, setAuthStatus] = useState(
-    storedAuth ? JSON.parse(storedAuth) : null
-  );
+  const [authStatus, setAuthStatus] = useState(null);
+  const [loading, setLoading] = useState(true); // To avoid flicker on refresh
 
   useEffect(() => {
     console.log("ApiProvider mounted, checking auth...");
     checkAuth();
   }, []);
 
-  // Keep localStorage in sync when auth changes
-  useEffect(() => {
-    if (authStatus) {
-      localStorage.setItem("authStatus", JSON.stringify(authStatus));
-    } else {
-      localStorage.removeItem("authStatus");
-    }
-  }, [authStatus]);
-
   const checkAuth = async () => {
     try {
       const response = await API.get(`${BACKEND_URL}/auth/status`, {
         withCredentials: true,
       });
-      console.log("Response from checkAuth:", response.data);
+      console.log("✅ Response from checkAuth:", response.data);
       setAuthStatus(response.data);
+      setLoading(false);
       return response.data;
     } catch (error) {
-      console.error("Auth check failed", error);
+      console.error("❌ Auth check failed", error);
       setAuthStatus(null);
+      setLoading(false);
       return null;
     }
   };
 
   return (
-    <ApiContext.Provider value={{ checkAuth, authStatus, setAuthStatus }}>
+    <ApiContext.Provider value={{ checkAuth, authStatus, setAuthStatus, loading }}>
       {children}
     </ApiContext.Provider>
   );
 };
 
 export const useApi = () => useContext(ApiContext);
+
 
 
 // import React, { createContext, useContext, useState, useEffect } from "react";

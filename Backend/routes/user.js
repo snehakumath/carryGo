@@ -48,10 +48,10 @@ const isProduction = process.env.NODE_ENV === 'production';
 
 res.cookie('accessToken', accessToken, {
   httpOnly: true,
-  maxAge: 3600000,
-  sameSite: isProduction ? 'none' : 'lax', // 'none' in prod for cross-site
-  secure: isProduction,                    // true in prod (HTTPS), false dev
+  secure: isProduction,         // only true if using HTTPS
+  sameSite: isProduction ? 'none' : 'lax',
   path: '/',
+  maxAge: 3600000
 });
 
 res.cookie('refreshToken', refreshToken, {
@@ -69,11 +69,10 @@ res.cookie('refreshToken', refreshToken, {
     return res.status(200).json({
       success: true,
       message: 'Login successful!',
-      accessToken,
-      refreshToken,
       user_type,
       email
     });
+    
 
   } catch (error) {
     console.error('Login error:', error.message);
@@ -132,12 +131,25 @@ router.post('/refresh-token', (req, res) => {
 
 // Logout route
 router.post('/logout', (req, res) => {
- console.log("Logout");
-
-  res.clearCookie('accessToken');
-  res.clearCookie('refreshToken');
-  return res.json({ success: true, message: 'Logged out successfully' });
+  console.log("Logout");
+ // On server logout route
+ res.clearCookie('accessToken', {
+  httpOnly: true,
+  secure: isProduction,
+  sameSite: isProduction ? 'none' : 'lax',
+  path: '/'
 });
+res.clearCookie('refreshToken', {
+  httpOnly: true,
+  secure: isProduction,
+  sameSite: isProduction ? 'none' : 'lax',
+  path: '/'
+});
+
+  
+  return res.json({ success: true, loggedIn: false, user: null });
+});
+
 
 
 

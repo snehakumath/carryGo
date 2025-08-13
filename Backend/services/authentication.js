@@ -73,6 +73,7 @@ const refreshSecretKey=process.env.REFRESH_TOKEN;
 // Function to create a JWT token
 function createTokenForUser(user) {
     try {
+        
         const token = jwt.sign(
             { email: user.email, user_type: user.user_type }, 
             secretKey, 
@@ -85,7 +86,20 @@ function createTokenForUser(user) {
         throw new Error("Token generation failed");
     }
 }
-
+function createRefreshToken(user) {
+    try {
+        const token = jwt.sign(
+            { email: user.email, user_type: user.user_type },
+            refreshSecretKey,
+            { expiresIn: "7d" } // Refresh token valid for 7 days
+        );
+        console.log("Refresh token generated successfully:", token);
+        return token;
+    } catch (err) {
+        console.error("Error generating refresh token:", err.message);
+        throw new Error("Refresh token generation failed");
+    }
+}
 // Function to validate a token
 function validateToken(token) {
     try {
@@ -148,5 +162,6 @@ module.exports = {
     createTokenForUser,
     validateToken,
     isAuthenticated,
+    createRefreshToken
 };
 

@@ -1,5 +1,6 @@
 import axios from "axios";
 
+
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:8000";
 
 const API = axios.create({
@@ -20,8 +21,8 @@ export const setAuthToken = (token) => {
 };
 
 // API calls
-export const checkAuthStatus = () => API.get('/auth/status',{ credentials: 'include' });
-export const processBooking = (data) => API.post('/booking/process', data,{ credentials: 'include' });
+export const checkAuthStatus = () => API.get('/auth/status');
+export const processBooking = (data) => API.post('/booking/process', data);
 
 export const getCoordinates = (location) =>
   fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${location}`)
