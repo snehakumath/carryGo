@@ -58,12 +58,16 @@ app.use(cors({
 
 
 // Serve static frontend files
-app.use(express.static(path.join(__dirname, '../Frontend/dist')));
+// app.use(express.static(path.join(__dirname, '../Frontend/dist')));
 console.log("URL",process.env.MONGO_URI);
 mongoose.connect(process.env.MONGO_URI || process.env.MONGO_LOCAL_URI )
     .then(() => console.log('MongoDB connected'))
     .catch(err => console.log(err));
-
+    
+app.get('/', (_req, res) => {
+      res.status(200).send('CarryGo API is running');
+    });
+    
 app.use("/auth", authRoutes);
 app.use('/api', allRoutes);
 app.use('/booking', bookingRoutes);
@@ -74,9 +78,9 @@ app.use('/api/admin',adminRotes);
 
 app.use('/', userRoute);
 
-app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, '../Frontend/dist', 'index.html'));
-});
+// app.get('*', (req, res) => {
+//     res.sendFile(path.join(__dirname, '../Frontend/dist', 'index.html'));
+// });
 
 
 
