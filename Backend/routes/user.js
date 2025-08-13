@@ -72,6 +72,7 @@ res.cookie('refreshToken', refreshToken, {
       accessToken,
       refreshToken,
       user_type,
+      email
     });
 
   } catch (error) {
