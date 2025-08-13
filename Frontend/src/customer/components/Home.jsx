@@ -7,7 +7,7 @@ function Home() {
   
 useEffect(()=>{
   console.log("Hello from Home");
-    });
+    },[]);
   return (
     <div className="bg-white text-black">
       {/* Hero Section */}
