@@ -29,20 +29,20 @@ const Login = () => {
       });
 
       const data = await response.json();
-     console.log("Data for auth",data.email,data.user_type);
+     console.log("Data for auth",data.user_type);
       if (response.ok) {
         console.log('Login successful:', data);
         setAuthStatus({
           loggedIn: true,
           user: {
-            email: data.email,
+            email: email,
             user_type: data.user_type,
           },
         });
         localStorage.setItem("authStatus", JSON.stringify({
           loggedIn: true,
           user: {
-            email: data.email,
+            email: email,
             user_type: data.user_type,
           },
         }));
