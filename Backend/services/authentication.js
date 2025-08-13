@@ -69,7 +69,7 @@
 
 const jwt = require('jsonwebtoken');
 const secretKey = process.env.JWT_SECRET || "$uperMan@123"; // Fallback for development
-
+const refreshSecretKey=process.env.REFRESH_TOKEN;
 // Function to create a JWT token
 function createTokenForUser(user) {
     try {
@@ -104,7 +104,6 @@ function validateToken(token) {
 }
 
 // Middleware to authenticate user
-const refreshSecretKey = process.env.JWT_REFRESH_SECRET || "$uperMan@124";
 
 const isAuthenticated = (req, res, next) => {
     let token = req.cookies?.accessToken || req.headers.authorization?.split(" ")[1];

@@ -22,7 +22,7 @@ router.get('/signup', (req, res) => {
 
 router.post('/login', async (req, res) => {
   const { user_type, email, password } = req.body;
-
+ console.log("LOGIN route", user_type, email, password);
   try {
     // Find the user first
     const user = await User.findOne({ email, user_type });
@@ -43,9 +43,29 @@ router.post('/login', async (req, res) => {
     const refreshToken = createTokenForUser({ email, user_type });
 
     // Set tokens in cookies
-    res.cookie('accessToken', accessToken, { httpOnly: true, maxAge: 3600000 });
-    res.cookie('refreshToken', refreshToken, { httpOnly: true, maxAge: 7 * 24 * 60 * 60 * 1000 });
+    console.log("NODE_ENV =", process.env.NODE_ENV);
+const isProduction = process.env.NODE_ENV === 'production';
 
+res.cookie('accessToken', accessToken, {
+  httpOnly: true,
+  maxAge: 3600000,
+  sameSite: isProduction ? 'none' : 'lax', // 'none' in prod for cross-site
+  secure: isProduction,                    // true in prod (HTTPS), false dev
+  path: '/',
+});
+
+res.cookie('refreshToken', refreshToken, {
+  httpOnly: true,
+  maxAge: 7 * 24 * 60 * 60 * 1000,
+  sameSite: isProduction ? 'none' : 'lax',
+  secure: isProduction,
+  path: '/',
+});
+
+
+    // res.cookie('accessToken', accessToken, { httpOnly: true, maxAge: 3600000 });
+    // res.cookie('refreshToken', refreshToken, { httpOnly: true, maxAge: 7 * 24 * 60 * 60 * 1000 });
+    console.log("Successss");
     return res.status(200).json({
       success: true,
       message: 'Login successful!',
@@ -62,7 +82,7 @@ router.post('/login', async (req, res) => {
 
 
 router.post('/signup', async (req, res) => {
-    console.log("/signup");
+  console.log("/signup");
   try {
       const { user_type, name, phone, email, password } = req.body;
       const user = await User.create({ user_type, name, phone, email, password });

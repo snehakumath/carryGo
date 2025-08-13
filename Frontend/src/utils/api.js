@@ -1,14 +1,16 @@
 import axios from "axios";
 
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:8000";
+
 const API = axios.create({
-  baseURL: "/",
+  baseURL: BACKEND_URL,
   headers: {
     "Content-Type": "application/json",
   },
   withCredentials: true, // Include cookies for authentication if needed
 });
 
-// Function to set Authorization token dynamically
+// Function to set Authorization token dynamically (optional if you don't use JWT header auth)
 export const setAuthToken = (token) => {
   if (token) {
     API.defaults.headers.Authorization = `Bearer ${token}`;
@@ -18,8 +20,9 @@ export const setAuthToken = (token) => {
 };
 
 // API calls
-export const checkAuthStatus = () => API.get("/auth/status");
-export const processBooking = (data) => API.post("/booking/process", data);
+export const checkAuthStatus = () => API.get('/auth/status');
+export const processBooking = (data) => API.post('/booking/process', data);
+
 export const getCoordinates = (location) =>
   fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${location}`)
     .then((res) => res.json())
@@ -29,4 +32,3 @@ export const getCoordinates = (location) =>
     .catch((err) => console.error("Error fetching coordinates:", err));
 
 export default API;
-

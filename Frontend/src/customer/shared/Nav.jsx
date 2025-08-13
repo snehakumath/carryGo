@@ -1,56 +1,39 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import NotificationModal from "./Notification";
-
+// import { useApi } from "../context/ApiContext"; 
+import {useApi} from '../../context/ApiContext';
 function Nav() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+ // const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(false);
   const [isNotifOpen, setIsNotifOpen] = useState(false);
   const [scrolling, setScrolling] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const notifRef = useRef(null);
   const navigate = useNavigate();
   const location = useLocation();
+  const { authStatus} = useApi(); 
+
+  // const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:8000";
 
   // useEffect(() => {
-  //   const token = localStorage.getItem("token");
-  //   console.log("Token - ",token);
-  //   if (!token) {
-  //     setLoading(false);
-  //     return;
-  //   }
-  //   fetch("http://localhost:8000/auth/status", {
+  //   setLoading(true); // Optional
+  //   fetch(`${BACKEND_URL}/auth/status`, {
   //     method: "GET",
   //     credentials: 'include',
   //   })
   //     .then((res) => res.ok ? res.json() : Promise.reject())
   //     .then((data) => {
-  //       console.log("Data.loggedIN",data);
   //       setIsLoggedIn(data.loggedIn);
   //       setUser(data.user);
   //     })
   //     .catch(() => setIsLoggedIn(false))
   //     .finally(() => setLoading(false));
-    
-  // }, []);
-  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:8000";
-
-  useEffect(() => {
-    setLoading(true); // Optional
-    fetch(`${BACKEND_URL}/auth/status`, {
-      method: "GET",
-      credentials: 'include',
-    })
-      .then((res) => res.ok ? res.json() : Promise.reject())
-      .then((data) => {
-        setIsLoggedIn(data.loggedIn);
-        setUser(data.user);
-      })
-      .catch(() => setIsLoggedIn(false))
-      .finally(() => setLoading(false));
-  }, []);
-  
+  // }, [location]);
+  // const isLoggedIn = authStatus?.loggedIn || false;
+  const user = authStatus?.user || null;
+  console.log("loggedin , user",isLoggedIn,user);
   useEffect(() => {
     const handleScroll = () => {
       setScrolling(window.scrollY > 50);

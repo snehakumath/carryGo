@@ -18,21 +18,18 @@ function checkForAuthenticationCookie(cookieName) {
   };
 }
 const authenticateJWT = (req, res, next) => {
-  console.log("Request Headers:", req.headers); // Log headers to see if Authorization is present
-  console.log("Request Body:", req.body); // Log the body to ensure it's not modified by mistake
+  const token = req.cookies?.accessToken;  // Read token from cookie
 
-  const token = req.header("Authorization")?.split(" ")[1];
-  
   if (!token) {
-    return res.status(403).send("Access Denied. No token provided.");
+    return res.status(401).json({ message: "Access Denied. No token provided." });
   }
 
-  jwt.verify(token,secretKey, (err, user) => {
+  jwt.verify(token, secretKey, (err, user) => {
     if (err) {
-      return res.status(403).send("Invalid token.");
+      return res.status(401).json({ message: "Invalid or expired token." });
     }
-    req.user = user; 
-    next(); 
+    req.user = user;
+    next();
   });
 };
 
