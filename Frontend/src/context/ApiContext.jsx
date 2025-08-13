@@ -14,20 +14,6 @@ export const ApiProvider = ({ children }) => {
     checkAuth(); // check on mount
   }, []);
 
-  // const login = async (email, password) => {
-  //   try {
-  //     const response = await API.post('/auth/login', { email, password });
-  //     console.log("Snehaaa");
-  //     // Backend sets cookie automatically, no need to manually save token here
-  //     await checkAuth(); // update auth status
-  //     return response.data;
-  //   } catch (error) {
-  //     console.error("Login failed", error);
-  //     throw error;
-  //   }
-  // };
-  
-
   const checkAuth = async () => {
     console.log("checkAuth");
     try {
