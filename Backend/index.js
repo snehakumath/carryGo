@@ -25,6 +25,7 @@ const server = http.createServer(app);
 const io = initializeSocket(server);
 
 const PORT = process.env.PORT || 8000;
+console.log("FRONTEND_URL:", process.env.FRONTEND_URL);
 
 const allowedOrigins = [
   "http://localhost:5173",       // local frontend
