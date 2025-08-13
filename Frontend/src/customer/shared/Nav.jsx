@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import NotificationModal from "./Notification";
-// import { useApi } from "../context/ApiContext"; 
 import {useApi} from '../../context/ApiContext';
+
+
 function Nav() {
   // const [isLoggedIn, setIsLoggedIn] = useState(false);
  // const [user, setUser] = useState(null);
@@ -16,7 +17,7 @@ function Nav() {
   const { authStatus} = useApi(); 
 
   // const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:8000";
-
+  console.log("Auth from nav",authStatus);
   const user = authStatus?.user || null;
   const isLoggedIn=authStatus.loggedIn;
   console.log("loggedin , user",isLoggedIn,user);
