@@ -19,6 +19,8 @@ const Profile = () => {
     acceptedOrders: 0,
     successfulOrders: 0
   });
+  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:8000";
+
   
 
   useEffect(() => {
