@@ -1,24 +1,31 @@
-import React, { useState, useEffect , useRef  } from "react";
-import { Link , useNavigate, useLocation} from "react-router-dom";
+import React, { useState, useEffect, useRef } from "react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import NotificationModal from "./Notification";
 import { useApi } from "../../context/ApiContext";
 
 function Nav() {
- const [isNotifOpen, setIsNotifOpen] = useState(false);
-   const [scrolling, setScrolling] = useState(false);
-   const [notifications, setNotifications] = useState([]);
-   const notifRef = useRef(null);
-   const loading=false;
+  const [isNotifOpen, setIsNotifOpen] = useState(false);
+  const [scrolling, setScrolling] = useState(false);
+  const [notifications, setNotifications] = useState([]);
+  const notifRef = useRef(null);
   const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:8000";
+  const [loading, setLoading] = useState(true);
 
-  
-  const { authStatus } = useApi(); 
-  console.log("Auth Status",authStatus);
+  const { authStatus } = useApi(); // ✅ moved before useEffect
   const isLoggedIn = authStatus?.loggedIn || false;
   const user = authStatus?.user || null;
-  console.log("is Loggedin",isLoggedIn, user);
+
   const navigate = useNavigate();
   const location = useLocation();
+
+  useEffect(() => {
+    if (authStatus) {
+      setLoading(false);
+    }
+  }, [authStatus]);
+
+  console.log("Auth Status",authStatus);
+  console.log("is Loggedin",isLoggedIn, user);
   
     useEffect(() => {
       const handleScroll = () => setScrolling(window.scrollY > 50);
