@@ -257,8 +257,7 @@ const Booking = () => {
       alert("Failed to mark order as complete.");
     }
   };
-  
-  
+   
   return (
  
     <div className="min-h-screen bg-white py-10 px-6">
