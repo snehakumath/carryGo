@@ -23,6 +23,7 @@ const AdminLogin = () => {
       console.log("Token",res.data);
 
       if (res.data.success || res.data.message === "Login successful") {
+        console.log("admin");
         navigate('/admin', { replace: true });
       }      
       
