@@ -336,19 +336,6 @@ const GoodsTracking = () => {
 )}   
 
 
-{selectedGood.vehicle_id ? (
-  <div className="bg-white shadow rounded p-4">
-    <h3 className="font-bold text-lg mb-2">Truck Details</h3>
-    <p><strong>Model:</strong> {selectedGood.vehicle_id.model_make}</p>
-    <p><strong>ID:</strong> {selectedGood.vehicle_id.vehicle_id}</p>
-    <p><strong>Capacity:</strong> {selectedGood.vehicle_id.capacity}</p>
-    <p><strong>Registration:</strong> {selectedGood.vehicle_id.registration_number}</p>
-  </div>
-) : (
-  <p className="text-gray-500 italic">No truck assigned yet.</p>
-)}
-
-
 
     {selectedGood?.status !== "Paid" && (
       <button

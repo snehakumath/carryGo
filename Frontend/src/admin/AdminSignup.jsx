@@ -9,7 +9,7 @@ const AdminSignup = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
-
+  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:8000";
   const handleSignup = async (e) => {
     e.preventDefault();
     setLoading(true);
