@@ -35,7 +35,17 @@ const AdminHome = () => {
         const res = await axios.get(`${BACKEND_URL}/api/admin/summary`, {
           withCredentials: true,
         });
-        setSummary(res.data);
+        console.log("Admin summary response:", res.data);
+
+        setSummary({
+          totalCustomers: res.data.totalCustomers || 0,
+          totalTransporters: res.data.totalTransporters || 0,
+          totalRevenue: res.data.totalRevenue || 0,
+          monthlyRevenue: res.data.monthlyRevenue || [],
+          transporterStatusCount: res.data.transporterStatusCount || [],
+          monthlySuccessRate: res.data.monthlySuccessRate || [],
+        });
+        
       } catch (err) {
         console.error("Error fetching summary:", err);
       }
@@ -100,11 +110,13 @@ const AdminHome = () => {
                   cx="50%"
                   cy="50%"
                   outerRadius={100}
-                  label
-                >
-                  {summary.transporterStatusCount.map((entry, index) => (
+                  label>
+   {summary.transporterStatusCount?.map((entry, index) => (
+  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />))}
+
+                  {/* {summary.transporterStatusCount.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
+                  ))} */}
                 </Pie>
                 <Tooltip />
               </PieChart>
