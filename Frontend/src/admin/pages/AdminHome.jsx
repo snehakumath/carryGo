@@ -36,16 +36,15 @@ const AdminHome = () => {
           withCredentials: true,
         });
         console.log("Admin summary response:", res.data);
-      setSummary(res.data);
-       // setSummary({
-          // totalCustomers: res.data.totalCustomers || 0,
-          // totalTransporters: res.data.totalTransporters || 0,
-          // totalRevenue: res.data.totalRevenue || 0,
-          // monthlyRevenue: res.data.monthlyRevenue || [],
-          // transporterStatusCount: res.data.transporterStatusCount || [],
-          // monthlySuccessRate: res.data.monthlySuccessRate || [],
-         
-       // });
+        setSummary({
+          totalCustomers: res.data.customers || 0,
+          totalTransporters: res.data.transporters || 0,
+          totalRevenue: res.data.revenue || 0,
+          monthlyRevenue: res.data.monthlyRevenue || [],
+          transporterStatusCount: res.data.transporterStatusCount || [], // backend not sending yet?
+          monthlySuccessRate: res.data.monthlySuccessRate || [], // backend not sending yet?
+        });
+        
         
       } catch (err) {
         console.error("Error fetching summary:", err);
@@ -130,13 +129,13 @@ const AdminHome = () => {
           <CardContent>
             <h3 className="text-lg font-semibold mb-4">Monthly Success Rate</h3>
             <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={summary.monthlySuccessRate || []}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="month" />
-                <YAxis />
-                <Tooltip />
-                <Line type="monotone" dataKey="successRate" stroke="#82ca9d" />
-              </LineChart>
+            <LineChart data={summary.monthlyBookings || []}>
+  <XAxis dataKey="month" />
+  <YAxis />
+  <Tooltip />
+  <Line type="monotone" dataKey="count" stroke="#82ca9d" />
+</LineChart>
+
             </ResponsiveContainer>
           </CardContent>
         </Card>
