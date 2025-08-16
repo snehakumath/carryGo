@@ -36,15 +36,16 @@ const AdminHome = () => {
           withCredentials: true,
         });
         console.log("Admin summary response:", res.data);
-
-        setSummary({
-          totalCustomers: res.data.totalCustomers || 0,
-          totalTransporters: res.data.totalTransporters || 0,
-          totalRevenue: res.data.totalRevenue || 0,
-          monthlyRevenue: res.data.monthlyRevenue || [],
-          transporterStatusCount: res.data.transporterStatusCount || [],
-          monthlySuccessRate: res.data.monthlySuccessRate || [],
-        });
+      setSummary(res.data);
+       // setSummary({
+          // totalCustomers: res.data.totalCustomers || 0,
+          // totalTransporters: res.data.totalTransporters || 0,
+          // totalRevenue: res.data.totalRevenue || 0,
+          // monthlyRevenue: res.data.monthlyRevenue || [],
+          // transporterStatusCount: res.data.transporterStatusCount || [],
+          // monthlySuccessRate: res.data.monthlySuccessRate || [],
+         
+       // });
         
       } catch (err) {
         console.error("Error fetching summary:", err);
