@@ -59,11 +59,13 @@ function AppRoutes() {
         {/* Admin */}
         <Route path="/admin-login" element={<AdminLogin />} />
         <Route path="/admin-signup" element={<AdminSignup />} />
-        <Route path="/admin/*" element={
+        {/* <Route path="/admin/*" element={
           <AdminProtectedRoute>
             <AdminDashboard />
           </AdminProtectedRoute>
-        } />
+        } />*/}
+        <Route path="/admin/*" element={<AdminDashboard />} />
+
       </Routes>
     </Router>
   );
