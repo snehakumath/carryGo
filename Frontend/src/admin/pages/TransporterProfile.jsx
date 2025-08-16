@@ -5,7 +5,7 @@ const TransporterProfile = ({ email }) => {
   const [transporter, setTransporter] = useState(null);
   const [bookings, setBookings] = useState([]);
   const [search, setSearch] = useState("");
-
+  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:8000";
   useEffect(() => {
     if (!email) return;
 

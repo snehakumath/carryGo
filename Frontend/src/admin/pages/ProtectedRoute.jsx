@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 
 const ProtectedRoute = ({ children }) => {
   const [auth, setAuth] = useState(null);
-
+  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:8000";
   useEffect(() => {
     axios.get(`${BACKEND_URL}/api/admin/check-auth`, {
       withCredentials: true
