@@ -10,6 +10,7 @@ const GoodsTracking = () => {
   const [isPaymentDone, setIsPaymentDone] = useState(false);
   const [assignedOrder, setAssignedOrder] = useState(null);
   const [availableToShare, setAvailableToShare] = useState([]);
+  const [vehicleData, setVehicleData] = useState(null);
   const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:8000";
 
   
@@ -29,6 +30,7 @@ const GoodsTracking = () => {
     const fetchGoods = async () => {
       try {
         const response = await axios.get(`${BACKEND_URL}/booking/goods`);
+        console.log("Raw goods:", response.data);
         const today = new Date();
       today.setHours(0, 0, 0, 0); // Normalize time for comparison
       // console.log("REsponse",response);
@@ -54,19 +56,19 @@ const GoodsTracking = () => {
     if (!selectedGood) return;
   
     const fetchBids = async () => {
-      console.log("fetchBids hit");
+    //  console.log("fetchBids hit");
       try {
         const response = await axios.get(`${BACKEND_URL}/api/bids/received/${selectedGood._id}`);
   
         const bidsWithStats = await Promise.all(
           response.data.map(async (bid) => {
             try {
-              console.log("email",bid.transporter.email);
+            //  console.log("email",bid.transporter.email);
               const statsRes = await axios.get(
                 `${BACKEND_URL}/api/transporter/stats/${bid.transporter.email}`
               );
-              console.log("stats",statsRes, statsRes.data.avgRating,
-                statsRes.data.successRate);
+             // console.log("stats",statsRes, statsRes.data.avgRating,
+                //statsRes.data.successRate);
               return {
                 ...bid,
                 avgRating: statsRes.data.avgRating,
@@ -83,7 +85,7 @@ const GoodsTracking = () => {
           })
         );
   
-        console.log("Fetched Bids with Stats:", bidsWithStats);
+      //  console.log("Fetched Bids with Stats:", bidsWithStats);
         setBids(bidsWithStats);
       } catch (error) {
         console.error("Error fetching bids:", error);
@@ -99,7 +101,7 @@ const GoodsTracking = () => {
       const response = await axios.get(`${BACKEND_URL}/booking/goods`);
       const today = new Date();
       today.setHours(0, 0, 0, 0);
-  
+   // console.log("REsponse to check vehicle",response.data);
       const filteredOrders = response.data.filter(order => {
         const orderDate = new Date(order.pickup_date);
         orderDate.setHours(0, 0, 0, 0);
@@ -127,13 +129,13 @@ const GoodsTracking = () => {
     }
   };
   const handlePayment = async (order,bid) => {
-    console.log(order);
-    console.log("Bid handlePayment",bid);
+   // console.log(order);
+   // console.log("Bid handlePayment",bid);
     try {
       const amount = bid.bid_amount;
     const order_id = order?._id;
       const payment_method = "UPI";
-      console.log(amount,order_id);
+   //   console.log(amount,order_id);
       if (!amount || !order_id) {
         alert("Invalid order/payment info.");
         return;
@@ -231,6 +233,34 @@ const GoodsTracking = () => {
     }
   };
 
+    useEffect(() => {
+    if (!selectedGood) {
+      console.log("Selected Good is null", selectedGood);
+      return; 
+    }
+    if (!selectedGood.vehicle_id) {
+      console.log("Selected Good has no vehicle_id", selectedGood);
+      return; 
+    }
+  
+    console.log("Selected Good with vehicle_id", selectedGood.vehicle_id);
+  
+    const fetchVehicle = async () => {
+      try {
+        const res = await fetch(`${BACKEND_URL}/booking/vehicles/${selectedGood.vehicle_id}`)
+        const data = await res.json();
+        console.log("Fetched vehicle data:", data);
+        setVehicleData(data);
+      } catch (err) {
+        console.error("Failed to fetch vehicle", err);
+      }
+    };
+  
+    fetchVehicle();
+  }, [selectedGood]);
+  
+  
+
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
    {isPaymentDone ? (
@@ -293,7 +323,32 @@ const GoodsTracking = () => {
     <p><strong>Transporter:</strong> {selectedGood.transporter_email.email}</p>
     <p><strong>Accepted Bid:</strong> Rs.{bid.bid_amount}</p>
     <p><strong>Status:</strong>{selectedGood.status}</p>
- 
+  {vehicleData ? ( 
+  <div className="bg-white shadow rounded p-4">
+    <h3 className="font-bold text-lg mb-2">Truck Details</h3>
+    <p><strong>Model:</strong> {vehicleData.model_make}</p>
+    <p><strong>ID:</strong> {vehicleData.vehicle_id}</p>
+    <p><strong>Capacity:</strong> {vehicleData.capacity}</p>
+    <p><strong>Registration:</strong> {vehicleData.registration_number}</p>
+  </div> 
+ ) : (
+  <p className="text-gray-500 italic">No truck assigned yet.</p>
+)}   
+
+
+{selectedGood.vehicle_id ? (
+  <div className="bg-white shadow rounded p-4">
+    <h3 className="font-bold text-lg mb-2">Truck Details</h3>
+    <p><strong>Model:</strong> {selectedGood.vehicle_id.model_make}</p>
+    <p><strong>ID:</strong> {selectedGood.vehicle_id.vehicle_id}</p>
+    <p><strong>Capacity:</strong> {selectedGood.vehicle_id.capacity}</p>
+    <p><strong>Registration:</strong> {selectedGood.vehicle_id.registration_number}</p>
+  </div>
+) : (
+  <p className="text-gray-500 italic">No truck assigned yet.</p>
+)}
+
+
 
     {selectedGood?.status !== "Paid" && (
       <button

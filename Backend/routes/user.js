@@ -26,7 +26,7 @@ router.post('/login', async (req, res) => {
   try {
     // Find the user first
     const user = await User.findOne({ email, user_type });
-
+   console.log("user",user);
     if (!user) {
       return res.status(401).json({ success: false, message: "Invalid email or user type" });
     }

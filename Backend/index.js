@@ -31,7 +31,7 @@ const allowedOrigins = [
 ];
 app.use(cors({
   origin: function (origin, callback) {
-    console.log("Allowed Origins:", allowedOrigins);
+    //console.log("Allowed Origins:", allowedOrigins);
     if (!origin) return callback(null, true); // allow server-to-server
 
     const isAllowed = allowedOrigins.some(o =>
@@ -55,12 +55,12 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 const PORT = process.env.PORT || 8000;
-console.log("FRONTEND_URL:", process.env.FRONTEND_URL);
+//console.log("FRONTEND_URL:", process.env.FRONTEND_URL);
 
 
 // Serve static frontend files
 //app.use(express.static(path.join(__dirname, '../Frontend/dist')));
-console.log("URL",process.env.MONGO_URI);
+//console.log("URL",process.env.MONGO_URI);
 mongoose.connect(process.env.MONGO_URI || process.env.MONGO_LOCAL_URI )
     .then(() => console.log('MongoDB connected'))
     .catch(err => console.log(err));

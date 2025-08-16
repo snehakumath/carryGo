@@ -29,7 +29,7 @@ const Login = () => {
       });
 
       const data = await response.json();
-      console.log("Login response:", data);
+     // console.log("Login response:", data);
 
       if (response.ok) {
         // Refresh auth state from backend cookie

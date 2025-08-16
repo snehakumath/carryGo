@@ -10,10 +10,10 @@ function Nav() {
   const notifRef = useRef(null);
 
   const { authStatus } = useApi(); 
-  console.log("Auth Status",authStatus);
+  //console.log("Auth Status",authStatus);
   const isLoggedIn = authStatus?.loggedIn || false;
   const user = authStatus?.user || null;
-  console.log("is Loggedin",isLoggedIn, user);
+ // console.log("is Loggedin",isLoggedIn, user);
   const navigate = useNavigate();
   const location = useLocation();
 

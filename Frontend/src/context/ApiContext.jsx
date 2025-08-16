@@ -11,7 +11,7 @@ export const ApiProvider = ({ children }) => {
   const [loading, setLoading] = useState(true); // To avoid flicker on refresh
 
   useEffect(() => {
-    console.log("ApiProvider mounted, checking auth...");
+ //   console.log("ApiProvider mounted, checking auth...");
     checkAuth();
   }, []);
 
@@ -20,7 +20,7 @@ export const ApiProvider = ({ children }) => {
       const response = await API.get(`${BACKEND_URL}/auth/status`, {
         withCredentials: true,
       });
-      console.log("✅ Response from checkAuth:", response.data);
+    //  console.log("✅ Response from checkAuth:", response.data);
       setAuthStatus(response.data);
       setLoading(false);
       return response.data;
