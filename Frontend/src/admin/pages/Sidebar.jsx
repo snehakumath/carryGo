@@ -7,7 +7,7 @@ const Sidebar = () => {
 
   const isActive = (path) => location.pathname.startsWith(path);
   const activeClass = "bg-[#2a2a2a] text-white font-semibold";
-
+  
   const handleLogout = () => {
     localStorage.removeItem('adminToken');
     localStorage.removeItem('adminInfo');

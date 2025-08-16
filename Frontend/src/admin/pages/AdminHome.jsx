@@ -32,7 +32,7 @@ const AdminHome = () => {
     const fetchSummary = async () => {
       console.log("summary");
       try {
-        const res = await axios.get(`${BACKEND_URL}/admin/summary`, {
+        const res = await axios.get(`${BACKEND_URL}/api/admin/summary`, {
           withCredentials: true,
         });
         setSummary(res.data);
