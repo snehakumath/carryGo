@@ -13,7 +13,10 @@ exports.login = async (req, res) => {
   const { email, password } = req.body;
   try {
     // your login logic
-    res.status(200).json({ message: 'Login successful' });
+    return res.status(200).json({
+      success: true,
+      message: "Login successful"
+    });    
   } catch (error) {
     res.status(500).json({ error: 'Login failed' });
   }

@@ -22,10 +22,9 @@ const AdminLogin = () => {
       );
       console.log("Token",res.data);
 
-      if (res.data.success) {
-        console.log("Hhhh");
+      if (res.data.success || res.data.message === "Login successful") {
         navigate('/admin', { replace: true });
-      }
+      }      
       
     } catch (err) {
       const msg = err.response?.data?.message || 'Login failed. Please try again.';
