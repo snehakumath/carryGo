@@ -41,9 +41,9 @@ const AdminHome = () => {
           totalTransporters: res.data.transporters || 0,
           totalRevenue: res.data.revenue || 0,
           monthlyRevenue: res.data.monthlyRevenue || [],
-          transporterStatusCount: res.data.transporterStatusCount || [], // backend not sending yet?
-          monthlySuccessRate: res.data.monthlySuccessRate || [], // backend not sending yet?
-        });
+          transporterStatusCount: res.data.transporterStatusCount || [],
+          monthlySuccessRate: res.data.monthlySuccessRate || [], // fallback to []
+        });        
         
         
       } catch (err) {
