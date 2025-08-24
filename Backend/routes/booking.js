@@ -582,44 +582,90 @@ router.put("/vehicles/make-available/:id", async (req, res) => {
 
 
 // ⏰ Cron Job - Automatically Free Up Trucks After Pickup Date
+// router.post("/complete-order", async (req, res) => {
+//   const { booking_id } = req.body;
+
+//   try {
+//     const booking = await Booking.findById(booking_id);
+//     if (!booking) {
+//       return res.status(404).json({ message: "Booking not found" });
+//     }
+//     // Update booking status and completion flag
+//     booking.status = "Completed";
+//     booking.order_completed = true;
+//     await booking.save();
+
+//     // Update vehicle availability
+//     if (booking.vehicle_id) {
+//       const vehicleObjectId = new mongoose.Types.ObjectId(booking.vehicle_id);
+   
+//     const updatedTruck = await Vehicle.findByIdAndUpdate(
+//       // booking.vehicle_id,
+//       vehicleObjectId,
+//       { availability_status: true },
+//       { new: true }
+//     );
+//   }
+//     if (!updatedTruck) {
+//       return res.status(404).json({ message: "Associated truck not found" });
+//     }
+
+//     res.status(200).json({
+//       message: "Order marked as completed and truck availability updated",
+//       booking,
+//       updatedTruck,
+//     });
+//   } catch (error) {
+//     console.error("Error completing order:", error);
+//     res.status(500).json({ message: "Server error completing order" });
+//   }
+// });
 router.post("/complete-order", async (req, res) => {
   const { booking_id } = req.body;
 
   try {
+    if (!booking_id) {
+      return res.status(400).json({ message: "Booking ID is required" });
+    }
+
     const booking = await Booking.findById(booking_id);
     if (!booking) {
       return res.status(404).json({ message: "Booking not found" });
     }
-    // Update booking status and completion flag
+
+    // ✅ Update booking
     booking.status = "Completed";
     booking.order_completed = true;
     await booking.save();
 
-    // Update vehicle availability
+    let updatedTruck = null;
     if (booking.vehicle_id) {
-      const vehicleObjectId = new mongoose.Types.ObjectId(booking.vehicle_id);
-   
-    const updatedTruck = await Vehicle.findByIdAndUpdate(
-      // booking.vehicle_id,
-      vehicleObjectId,
-      { availability_status: true },
-      { new: true }
-    );
-  }
-    if (!updatedTruck) {
-      return res.status(404).json({ message: "Associated truck not found" });
+      try {
+        // Force into ObjectId
+        const vehicleObjectId = new mongoose.Types.ObjectId(booking.vehicle_id);
+        updatedTruck = await Vehicle.findByIdAndUpdate(
+          vehicleObjectId,
+          { availability_status: true },
+          { new: true }
+        );
+      } catch (err) {
+        console.error("🚨 Vehicle update failed:", err.message);
+      }
     }
 
-    res.status(200).json({
-      message: "Order marked as completed and truck availability updated",
+    return res.status(200).json({
+      message: "Order marked as completed",
       booking,
       updatedTruck,
     });
   } catch (error) {
-    console.error("Error completing order:", error);
-    res.status(500).json({ message: "Server error completing order" });
+    console.error("❌ Error completing order:", error); // print full stack trace
+    return res
+      .status(500)
+      .json({ message: error.message || "Server error completing order" });
   }
 });
+
 
 // routes/orders.js or similar
 router.get("/view-orders/:email", async (req, res) => {
