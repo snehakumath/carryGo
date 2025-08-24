@@ -505,7 +505,7 @@ router.put("/vehicles/make-available/:id", async (req, res) => {
     await vehicle.save();
 
     const order = await Booking.findOne({
-      vehicle_id: req.params.id,
+      vehicle_id: vehicle._id,
       order_completed: false,
     });
 
