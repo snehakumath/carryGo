@@ -221,7 +221,7 @@ router.get("/orders", async (req, res) => {
       bid_status: "Customer Accepted",
      status: { $in: ["Accepted", "Assigned"] },
     }).lean();
-    
+
     console.log("Result orders",acceptedOrders, availableOrders, placedBids);
     return res.json({
       availableOrders,
@@ -590,19 +590,22 @@ router.post("/complete-order", async (req, res) => {
     if (!booking) {
       return res.status(404).json({ message: "Booking not found" });
     }
-
     // Update booking status and completion flag
     booking.status = "Completed";
     booking.order_completed = true;
     await booking.save();
 
     // Update vehicle availability
+    if (booking.vehicle_id) {
+      const vehicleObjectId = new mongoose.Types.ObjectId(booking.vehicle_id);
+   
     const updatedTruck = await Vehicle.findByIdAndUpdate(
-      booking.vehicle_id,
+      // booking.vehicle_id,
+      vehicleObjectId,
       { availability_status: true },
       { new: true }
     );
-
+  }
     if (!updatedTruck) {
       return res.status(404).json({ message: "Associated truck not found" });
     }
