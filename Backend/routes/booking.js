@@ -492,7 +492,7 @@ router.get("/vehicles/:vehicle_id", async (req, res) => {
 });
 
 router.put("/vehicles/make-available/:id", async (req, res) => {
-
+   console.log("make-available",req.params.id);
   try {
     const vehicle = await Vehicle.findOne({ vehicle_id: req.params.id });
 
