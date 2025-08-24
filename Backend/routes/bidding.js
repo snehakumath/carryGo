@@ -149,57 +149,6 @@ router.post("/customer/accept", async (req, res) => {
   }
 });
 
-
-
-// router.post("/customer/accept", async (req, res) => {
-//   try {
-//     const { good_id, transporter_email, amount } = req.body;
-
-//     if (!good_id || !transporter_email || !amount) {
-//       return res.status(400).json({ error: "Missing required fields" });
-//     }
-
-//     // Step 1: Find transporter by email
-//     const transporter = await User.findOne({ email: transporter_email });
-//     if (!transporter) {
-//       return res.status(404).json({ error: "Transporter not found" });
-//     }
-
-//     const transporterId = transporter._id;
-
-//     // Step 2: Update booking with accepted transporter and amount
-//     const updatedBooking = await Booking.findByIdAndUpdate(
-//       good_id,
-//       {
-//         status: "Accepted",
-//         bid_status: "Customer Accepted",
-//         transporter_email: transporterId, // <-- Save ObjectId, not string
-//         final_amount: amount,
-//       },
-//       { new: true }
-//     );
-
-//     if (!updatedBooking) {
-//       return res.status(404).json({ error: "Booking not found" });
-//     }
-
-//     // Step 3: Reject all other bids for this order
-//     await Bidding.updateMany(
-//       {
-//         booking_id: new mongoose.Types.ObjectId(good_id),
-//         transporter: { $ne: transporterId },
-//       },
-//       { $set: { status: "Rejected" } }
-//     );
-
-//     res.status(200).json({ message: "Bid accepted successfully" });
-
-//   } catch (error) {
-//     console.error("❌ Error accepting bid:", error);
-//     res.status(500).json({ error: "Internal server error" });
-//   }
-// });
-
 router.put("/orders/bid/:orderId", async (req, res) => {
   const { orderId } = req.params;
   const { transporterEmail, bidAmount } = req.body;

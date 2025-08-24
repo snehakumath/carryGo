@@ -63,7 +63,8 @@ const bookingSchema = new mongoose.Schema({
   },
   vehicle_id: { 
       type: Schema.Types.ObjectId,
-       ref: "vehicle" 
+       ref: "vehicle" ,
+       default:null,
       },
   order_completed: {
     type: Boolean,

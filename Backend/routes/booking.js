@@ -186,16 +186,6 @@ router.get("/orders", async (req, res) => {
   }
 });
 
-// router.get("/vehicles/:id", async (req, res) => {
-//   try {
-//     const vehicle = await Vehicle.findById(req.params.id); // use findById for ObjectId
-//     if (!vehicle) return res.status(404).json({ message: "Vehicle not found" });
-//     res.json(vehicle);
-//   } catch (err) {
-//     res.status(500).json({ message: err.message });
-//   }
-// });
-
 //fetch transporter and vehicle detail for customer
 router.get('/:order_id', async (req, res) => {
   console.log("2");
@@ -413,58 +403,6 @@ router.put("/orders/accept/:orderId", async (req, res) => {
       res.status(500).json({ message: "Internal server error", error });
   }
 });
-
-
-// router.post("/assign-truck",async (req, res) => {
-//   try {
-//     const { booking_id, vehicle_id , truck_shared } = req.body;
-//     if (!booking_id || !vehicle_id) {
-//       return res.status(400).json({ message: "Booking ID and Vehicle ID are required." });
-//     }
-
-//     // Update booking with assigned vehicle
-//     const updatedBooking = await Booking.findByIdAndUpdate(
-//       booking_id,
-//       { vehicle_id: vehicle_id },
-//       {status:"Assigned"},
-//       { new: true }
-//     );
-//     console.log("Update Booking",updatedBooking);
-
-//     if (!updatedBooking) {
-//       return res.status(404).json({ message: "Booking not found" });
-//     }
-
-//     const vehicle = await Vehicle.findById(vehicle_id);
-//     if (!vehicle) {
-//       return res.status(404).json({ message: "Vehicle not found" });
-//     }
-//     vehicle.assigned_bookings.push(booking_id);
-//     vehicle.truck_shared = truck_shared;
-//     if (!vehicle) {
-//       return res.status(404).json({ message: "Vehicle not found" });
-//     }
-//     if (truck_shared) {
-//       // If shared and now 2 bookings, mark unavailable
-//       if (vehicle.assigned_bookings.length >= 2) {
-//         vehicle.availability_status = false;
-//       }
-//     } else {
-//       // Not shared => mark unavailable immediately
-//       vehicle.availability_status = false;
-//     }
-
-//     await vehicle.save();
-//     res.status(200).json({
-//       message: "Truck assigned successfully",
-//       updatedBooking,
-//        vehicle,
-//     });
-//   } catch (error) {
-//     console.error("Error assigning truck:", error);
-//     res.status(500).json({ message: "Internal server error" });
-//   }
-// });
 
 router.post("/assign-truck", async (req, res) => {
   try {
@@ -752,6 +690,10 @@ router.post('/cancel-booking', async (req, res) => {
     const booking = await Booking.findByIdAndUpdate(
       booking_id,
       { status: "Cancelled" },
+      {transporter_email:null},
+      {vehicle_id:null},
+      {shared_with_email:null},  
+      {final_amiunt:null},    
       { new: true }
     );
     if (!booking) return res.status(404).json({ message: "Booking not found" });
