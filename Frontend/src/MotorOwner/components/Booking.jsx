@@ -218,7 +218,7 @@ const Booking = () => {
       const updatedOrders = await axios.get(
         `${BACKEND_URL}/booking/orders?transporterEmail=${transporterEmail}`
       );
-      setAcceptedOrders(updatedOrders.data.acceptedOrders || []);
+      //setAcceptedOrders(updatedOrders.data.acceptedOrders || []);
       console.log("updated order",updatedOrders);
       const updatedTrucks = await axios.get(
         `${BACKEND_URL}/booking/trucks/${transporterEmail}`

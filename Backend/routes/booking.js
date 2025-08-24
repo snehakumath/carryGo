@@ -221,6 +221,7 @@ router.get("/orders", async (req, res) => {
       bid_status: "Customer Accepted",
      status: { $in: ["Accepted", "Assigned"] },
     }).lean();
+    
     console.log("Result orders",acceptedOrders, availableOrders, placedBids);
     return res.json({
       availableOrders,
@@ -461,6 +462,7 @@ router.post("/assign-truck", async (req, res) => {
     }
 
     // Ensure vehicle_id is stored as ObjectId & set status to Assigned
+
     const updatedBooking = await Booking.findByIdAndUpdate(
       booking_id,
       {
