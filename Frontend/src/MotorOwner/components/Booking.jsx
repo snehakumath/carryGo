@@ -79,7 +79,7 @@ const Booking = () => {
         // Distinguish on frontend
         const availableOrders = orders.filter(o => !o.transporter_email); 
         const acceptedOrders = orders.filter(o => 
-          o.transporter_email === transporterEmail && (o.status == "Assigned")
+          o.transporter_email === transporterEmail && (o.bid_status == "Accepted")
         );
         const placedBids = orders.filter(o => 
           o.bid_status=="Bidding" && o.status=="Accepted"
