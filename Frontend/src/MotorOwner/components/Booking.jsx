@@ -49,45 +49,15 @@ const Booking = () => {
       }, [transporterEmail]);
 
   // Fetch orders once transporterEmail is available 
-  // useEffect(() => {
-  //   if (!transporterEmail) return;
-
-  //   axios.get(`${BACKEND_URL}/booking/orders?transporterEmail=${transporterEmail}`)
-  //     .then((res) => {
-  //       console.log("Response Data:", res.data);
-  //       setAvailableOrders(res.data.availableOrders || []);
-  //       setPlacedBids(res.data.placedBids || []);
-  //       setAcceptedOrders(res.data.acceptedOrders || []);
-  //     })
-  //     .catch((err) => {
-  //       console.error("Error fetching orders:", err);
-  //       if (err.response) {
-  //         console.error("Response Data:", err.response.data);
-  //       }
-  //     });
-      
-  // }, [transporterEmail]);
   useEffect(() => {
     if (!transporterEmail) return;
-  
+
     axios.get(`${BACKEND_URL}/booking/orders?transporterEmail=${transporterEmail}`)
       .then((res) => {
         console.log("Response Data:", res.data);
-  
-        const orders = Array.isArray(res.data) ? res.data : [];
-       console.log("Orders",orders);
-        // Distinguish on frontend
-        const availableOrders = orders.filter(o => o.transporter_email==null); 
-        const acceptedOrders = orders.filter(o => 
-          o.transporter_email === transporterEmail && (o.bid_status == "Customer Accepted")
-        );
-        const placedBids = orders.filter(o => 
-          o.bid_status=="Bidding" && o.status=="Accepted"
-        );
-  
-        setAvailableOrders(availableOrders);
-        setAcceptedOrders(acceptedOrders);
-        setPlacedBids(placedBids);
+        setAvailableOrders(res.data.availableOrders || []);
+        setPlacedBids(res.data.placedBids || []);
+        setAcceptedOrders(res.data.acceptedOrders || []);
       })
       .catch((err) => {
         console.error("Error fetching orders:", err);
@@ -95,7 +65,37 @@ const Booking = () => {
           console.error("Response Data:", err.response.data);
         }
       });
+      
   }, [transporterEmail]);
+  // useEffect(() => {
+  //   if (!transporterEmail) return;
+  
+  //   axios.get(`${BACKEND_URL}/booking/orders?transporterEmail=${transporterEmail}`)
+  //     .then((res) => {
+  //       console.log("Response Data:", res.data);
+  
+  //       const orders = Array.isArray(res.data) ? res.data : [];
+  //      console.log("Orders",orders);
+  //       // Distinguish on frontend
+  //       const availableOrders = orders.filter(o => o.transporter_email==null); 
+  //       const acceptedOrders = orders.filter(o => 
+  //         o.transporter_email === transporterEmail && (o.bid_status == "Customer Accepted")
+  //       );
+  //       const placedBids = orders.filter(o => 
+  //         o.bid_status=="Bidding" && o.status=="Accepted"
+  //       );
+  
+  //       setAvailableOrders(availableOrders);
+  //       setAcceptedOrders(acceptedOrders);
+  //       setPlacedBids(placedBids);
+  //     })
+  //     .catch((err) => {
+  //       console.error("Error fetching orders:", err);
+  //       if (err.response) {
+  //         console.error("Response Data:", err.response.data);
+  //       }
+  //     });
+  // }, [transporterEmail]);
   
 
   const handlePlaceBid = async (orderId) => {

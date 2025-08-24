@@ -126,65 +126,112 @@ router.get("/goods", async (req, res) => {
   }
 });
 
+// router.get("/orders", async (req, res) => {
+//   try {
+//     const transporterEmail = req.query.transporterEmail;
+//     const today = new Date();
+//     today.setHours(0, 0, 0, 0);
+
+//     // ✅ Step 1: Get transporter by email
+//     const transporter = await User.findOne({ email: transporterEmail }).lean();
+//     if (!transporter) return res.status(404).json({ error: "Transporter not found" });
+
+//     const transporterId = transporter._id;
+
+//     // ✅ Step 2: Fetch bookings
+//     const [eligibleBookings, acceptedBookings] = await Promise.all([
+//       Booking.find({
+//         pickup_date: { $gte: today },
+//         status: { $in: ["Accepted", "Pending"] },
+//         bid_status: { $in: ["Pending", "Bidding"] },
+//       }).lean(),
+//       Booking.find({
+//         pickup_date: { $gte: today },
+//         status: "Accepted",
+//         bid_status: "Customer Accepted",
+//         transporter_email: transporterId, // ✅ This now works
+//       }).lean(),
+//     ]);
+
+//     // ✅ Step 3: Get all bids by transporter
+//     const transporterBids = await Bidding.find({
+//       transporter: transporterId,
+//     }).lean();
+
+//     const transporterBidIds = new Set(
+//       transporterBids.map((bid) => bid.booking_id.toString())
+//     );
+
+//     const placedBids = [];
+//     const availableOrders = [];
+
+//     for (const booking of eligibleBookings) {
+//       const id = booking._id.toString();
+//       if (transporterBidIds.has(id)) {
+//         placedBids.push(booking);
+//       } else {
+//         availableOrders.push(booking);
+//       }
+//     }
+
+//     return res.json({
+//       availableOrders,
+//       placedBids,
+//       acceptedOrders: acceptedBookings,
+//     });
+
+//   } catch (error) {
+//     console.error("❌ Error in /orders:", error);
+//     return res.status(500).json({ error: "Internal Server Error" });
+//   }
+// });
+
 router.get("/orders", async (req, res) => {
   try {
     const transporterEmail = req.query.transporterEmail;
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    if (!transporterEmail) {
+      return res.status(400).json({ error: "Transporter email required" });
+    }
 
-    // ✅ Step 1: Get transporter by email
+    // ✅ Get transporter
     const transporter = await User.findOne({ email: transporterEmail }).lean();
-    if (!transporter) return res.status(404).json({ error: "Transporter not found" });
+    if (!transporter) {
+      return res.status(404).json({ error: "Transporter not found" });
+    }
 
     const transporterId = transporter._id;
 
-    // ✅ Step 2: Fetch bookings
-    const [eligibleBookings, acceptedBookings] = await Promise.all([
-      Booking.find({
-        pickup_date: { $gte: today },
-        status: { $in: ["Accepted", "Pending"] },
-        bid_status: { $in: ["Pending", "Bidding"] },
-      }).lean(),
-      Booking.find({
-        pickup_date: { $gte: today },
-        status: "Accepted",
-        bid_status: "Customer Accepted",
-        transporter_email: transporterId, // ✅ This now works
-      }).lean(),
-    ]);
-
-    // ✅ Step 3: Get all bids by transporter
-    const transporterBids = await Bidding.find({
-      transporter: transporterId,
+    // 1️⃣ Available Orders → transporter not assigned yet
+    const availableOrders = await Booking.find({
+      pickup_date: { $gte: new Date() },
+      transporter_email: null, // no transporter yet
     }).lean();
 
-    const transporterBidIds = new Set(
-      transporterBids.map((bid) => bid.booking_id.toString())
-    );
+    // 2️⃣ Placed Bids → transporter placed bid but still bidding
+    const placedBids = await Booking.find({
+      pickup_date: { $gte: new Date() },
+      transporter_email: transporterId,
+      bid_status: "Bidding",
+    }).lean();
 
-    const placedBids = [];
-    const availableOrders = [];
-
-    for (const booking of eligibleBookings) {
-      const id = booking._id.toString();
-      if (transporterBidIds.has(id)) {
-        placedBids.push(booking);
-      } else {
-        availableOrders.push(booking);
-      }
-    }
+    // 3️⃣ Accepted Orders → customer accepted this transporter
+    const acceptedOrders = await Booking.find({
+      pickup_date: { $gte: new Date() },
+      transporter_email: transporterId,
+      bid_status: "Customer Accepted",
+    }).lean();
 
     return res.json({
       availableOrders,
       placedBids,
-      acceptedOrders: acceptedBookings,
+      acceptedOrders,
     });
-
   } catch (error) {
     console.error("❌ Error in /orders:", error);
     return res.status(500).json({ error: "Internal Server Error" });
   }
 });
+
 
 //fetch transporter and vehicle detail for customer
 router.get('/:order_id', async (req, res) => {

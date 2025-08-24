@@ -24,8 +24,8 @@ function Nav() {
     }
   }, [authStatus]);
 
-  console.log("Auth Status",authStatus);
-  console.log("is Loggedin",isLoggedIn, user);
+  //console.log("Auth Status",authStatus);
+  //console.log("is Loggedin",isLoggedIn, user);
   
     useEffect(() => {
       const handleScroll = () => setScrolling(window.scrollY > 50);
