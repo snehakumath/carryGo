@@ -219,6 +219,7 @@ router.get("/orders", async (req, res) => {
       pickup_date: { $gte: new Date() },
       transporter_email: transporterId,
       bid_status: "Customer Accepted",
+     status: { $in: ["Accepted", "Assigned"] },
     }).lean();
     console.log("Result orders",acceptedOrders, availableOrders, placedBids);
     return res.json({
