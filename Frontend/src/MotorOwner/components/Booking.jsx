@@ -77,9 +77,9 @@ const Booking = () => {
         const orders = Array.isArray(res.data) ? res.data : [];
   
         // Distinguish on frontend
-        const availableOrders = orders.filter(o => !o.transporter_email); 
+        const availableOrders = orders.filter(o => o.transporter_email==null); 
         const acceptedOrders = orders.filter(o => 
-          o.transporter_email === transporterEmail && (o.bid_status == "Accepted")
+          o.transporter_email === transporterEmail && (o.bid_status == "Customer Accepted")
         );
         const placedBids = orders.filter(o => 
           o.bid_status=="Bidding" && o.status=="Accepted"
