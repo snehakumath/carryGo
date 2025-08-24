@@ -49,15 +49,45 @@ const Booking = () => {
       }, [transporterEmail]);
 
   // Fetch orders once transporterEmail is available 
+  // useEffect(() => {
+  //   if (!transporterEmail) return;
+
+  //   axios.get(`${BACKEND_URL}/booking/orders?transporterEmail=${transporterEmail}`)
+  //     .then((res) => {
+  //       console.log("Response Data:", res.data);
+  //       setAvailableOrders(res.data.availableOrders || []);
+  //       setPlacedBids(res.data.placedBids || []);
+  //       setAcceptedOrders(res.data.acceptedOrders || []);
+  //     })
+  //     .catch((err) => {
+  //       console.error("Error fetching orders:", err);
+  //       if (err.response) {
+  //         console.error("Response Data:", err.response.data);
+  //       }
+  //     });
+      
+  // }, [transporterEmail]);
   useEffect(() => {
     if (!transporterEmail) return;
-
+  
     axios.get(`${BACKEND_URL}/booking/orders?transporterEmail=${transporterEmail}`)
       .then((res) => {
         console.log("Response Data:", res.data);
-        setAvailableOrders(res.data.availableOrders || []);
-        setPlacedBids(res.data.placedBids || []);
-        setAcceptedOrders(res.data.acceptedOrders || []);
+  
+        const orders = Array.isArray(res.data) ? res.data : [];
+  
+        // Distinguish on frontend
+        const availableOrders = orders.filter(o => !o.transporter_email); 
+        const acceptedOrders = orders.filter(o => 
+          o.transporter_email === transporterEmail && (o.status == "Assigned")
+        );
+        const placedBids = orders.filter(o => 
+          o.bid_status=="Bidding" && o.status=="Accepted"
+        );
+  
+        setAvailableOrders(availableOrders);
+        setAcceptedOrders(acceptedOrders);
+        setPlacedBids(placedBids);
       })
       .catch((err) => {
         console.error("Error fetching orders:", err);
@@ -65,8 +95,8 @@ const Booking = () => {
           console.error("Response Data:", err.response.data);
         }
       });
-      
   }, [transporterEmail]);
+  
 
   const handlePlaceBid = async (orderId) => {
     const bidAmount = bidAmounts[orderId];
@@ -189,7 +219,7 @@ const Booking = () => {
         `${BACKEND_URL}/booking/orders?transporterEmail=${transporterEmail}`
       );
       setAcceptedOrders(updatedOrders.data.acceptedOrders || []);
-      console.log("updated order",updatedOrders.data.acceptedOrders );
+      console.log("updated order",updatedOrders);
       const updatedTrucks = await axios.get(
         `${BACKEND_URL}/booking/trucks/${transporterEmail}`
       );

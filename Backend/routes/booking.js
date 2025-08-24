@@ -289,7 +289,7 @@ router.post("/orders/reject", async (req, res) => {
 router.get("/orders/:transporterEmail", async (req, res) => {
   console.log("hiittt");
   try {
-      const transporterEmail = req.query.email; // Get the transporter's email from query params
+    const transporterEmail = req.query.transporterEmail; // Get the transporter's email from query params
       const orders = await Booking.find({
           $or: [
               {  transporter_email: null }, // Show only unassigned pending orders
