@@ -220,7 +220,7 @@ router.get("/orders", async (req, res) => {
       transporter_email: transporterId,
       bid_status: "Customer Accepted",
     }).lean();
-
+    console.log("Result orders",acceptedOrders, availableOrders, placedBids);
     return res.json({
       availableOrders,
       placedBids,
