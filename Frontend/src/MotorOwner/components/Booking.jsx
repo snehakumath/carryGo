@@ -75,7 +75,7 @@ const Booking = () => {
         console.log("Response Data:", res.data);
   
         const orders = Array.isArray(res.data) ? res.data : [];
-  
+       console.log("Orders",orders);
         // Distinguish on frontend
         const availableOrders = orders.filter(o => o.transporter_email==null); 
         const acceptedOrders = orders.filter(o => 
@@ -279,7 +279,7 @@ const Booking = () => {
       );
       const available = updatedTrucks.data.filter(t => t.availability_status === true);
       const busy = updatedTrucks.data.filter(t => t.availability_status === false);
-      console.log("Available",available);
+      //console.log("Available",available);
       setAvailableTrucks(available);
       setBusyTrucks(busy);
     } catch (error) {
@@ -412,7 +412,6 @@ const Booking = () => {
     </div>
   
     {/* Busy Trucks Section */}
-   {/* Busy Trucks Section */}
 {busyTrucks.length > 0 && (
   <div className="mt-12">
     <h3 className="text-3xl font-bold text-gray-800 mb-8 text-center">Busy Trucks</h3>
