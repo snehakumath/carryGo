@@ -216,6 +216,7 @@ router.get("/orders", async (req, res) => {
     // 3️⃣ Placed Bids → transporter has bid but still "Bidding"
     const placedBids = await Bidding.find({
       transporter: transporterId,
+      pickup_date:{$gte:new Date()},
       status: "Bidding",
     })
       .populate("booking_id")
