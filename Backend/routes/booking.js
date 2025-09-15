@@ -217,11 +217,14 @@ router.get("/orders", async (req, res) => {
     // 3️⃣ Placed Bids → transporter has bid but still "Bidding"
     const placedBids = await Bidding.find({
       transporter: transporterId,
-      pickup_date:{$gte:new Date()},
       status: "Bidding",
     })
-      .populate("booking_id")
-      .lean();
+    .populate({
+      path: "booking_id",
+      match: { pickup_date: { $gte: new Date() } },  // Filter applied when populating booking_id
+      select: 'pickup_location dropoff_location pickup_date status',
+    })
+    .lean();
       console.log("placee bids",placedBids);
 
     // 4️⃣ Accepted Orders → transporter bid status is "Accepted"
