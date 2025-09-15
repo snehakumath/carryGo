@@ -185,6 +185,7 @@ router.get("/goods", async (req, res) => {
 //     return res.status(500).json({ error: "Internal Server Error" });
 //   }
 // });
+
 router.get("/orders", async (req, res) => {
   try {
     const transporterEmail = req.query.transporterEmail;
@@ -242,6 +243,65 @@ router.get("/orders", async (req, res) => {
     return res.status(500).json({ error: "Internal Server Error" });
   }
 });
+// router.get("/orders", async (req, res) => {
+//   try {
+//     const transporterEmail = req.query.transporterEmail;
+//     if (!transporterEmail) {
+//       return res.status(400).json({ error: "Transporter email required" });
+//     }
+
+//     const transporter = await User.findOne({ email: transporterEmail }).lean();
+//     if (!transporter) {
+//       return res.status(404).json({ error: "Transporter not found" });
+//     }
+//     const transporterId = transporter._id;
+//      console.log("Transporter Id", transporterId);
+//     // 1️⃣ Get all "Bidding" bids by this transporter
+//     const transporterBids = await Bidding.find({
+//       transporter: transporterId,
+//       status: "Bidding",
+//     }).select("booking_id").lean();
+
+//     console.log("TransporterBids",transporterBids);
+//     const bidBookingIds = transporterBids.map(b => b.booking_id);
+
+//     // 2️⃣ Available Orders → Booking.status = Pending and not already bid by transporter
+//     const availableOrders = await Booking.find({
+//       pickup_date: { $gte: new Date() },
+//       status: "Pending",
+//       _id: { $nin: bidBookingIds },
+//     }).lean();
+//    console.log("Available Orders",availableOrders);
+   
+//     // 3️⃣ Placed Bids → transporter has bid but still "Bidding"
+//     const placedBids = await Bidding.find({
+//       transporter: transporterId,
+//       pickup_date:{$gte:new Date()},
+//       status: "Bidding",
+//     })
+//       .populate("booking_id")
+//       .lean();
+//       console.log("placee bids",placedBids);
+
+//     // 4️⃣ Accepted Orders → transporter bid status is "Accepted"
+//     const acceptedOrders = await Bidding.find({
+//       transporter: transporterId,
+//       status: "Accepted",
+//     })
+//       .populate("booking_id")
+//       .lean();
+
+//     return res.json({
+//       availableOrders,
+//       placedBids,
+//       acceptedOrders,
+//     });
+
+//   } catch (error) {
+//     console.error("❌ Error in /orders:", error);
+//     return res.status(500).json({ error: "Internal Server Error" });
+//   }
+// });
 
 
 
