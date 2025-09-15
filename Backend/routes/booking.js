@@ -204,7 +204,7 @@ router.get("/orders", async (req, res) => {
       transporter: transporterId,
       status: "Bidding",
     }).select("booking_id").lean();
-    console.log("TransporterBids",transporterBids);
+    //console.log("TransporterBids",transporterBids);
     const bidBookingIds = transporterBids.map(b => b.booking_id);
 
     // 2️⃣ Available Orders → Booking.status = Pending and not already bid by transporter
