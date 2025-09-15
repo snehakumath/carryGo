@@ -225,7 +225,8 @@ router.get("/orders", async (req, res) => {
       select: 'pickup_location dropoff_location pickup_date status',
     })
     .lean();
-      console.log("placee bids",placedBids);
+    const filteredPlacedBids = placedBids.filter(bid => bid.booking_id !== null);
+      console.log("placee bids",filteredPlacedBids);
 
     // 4️⃣ Accepted Orders → transporter bid status is "Accepted"
     const acceptedOrders = await Bidding.find({
@@ -237,7 +238,7 @@ router.get("/orders", async (req, res) => {
 
     return res.json({
       availableOrders,
-      placedBids,
+      filteredPlacedBids,
       acceptedOrders,
     });
 
