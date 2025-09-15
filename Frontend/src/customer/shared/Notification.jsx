@@ -1,10 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { io } from "socket.io-client";
 import { X } from "lucide-react";
 import axios from "axios";
-
+import { socket } from "../../utils/socket";
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:8000";
-const socket = io(BACKEND_URL);
 
 
 const CustomerNotification = ({ onClose }) => {
@@ -38,7 +36,7 @@ const CustomerNotification = ({ onClose }) => {
       setNotifications(data);
     });
 
-    socket.on("customerNotification", (data) => {
+    socket.on("newNotification", (data) => {
       console.log("Received Notification:", data);
 
       // Prevent duplicate notifications
@@ -49,9 +47,10 @@ const CustomerNotification = ({ onClose }) => {
     });
 
     return () => {
+      socket.off("connect");
       socket.off("customerNotification");
       socket.off("previousNotifications");
-      socket.off("connect");
+  
     };
   }, [customerEmail]);
 

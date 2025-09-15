@@ -13,6 +13,7 @@ const paymentRoutes = require('./routes/payment');
 const biddingRoutes = require("./routes/bidding");
 const feedbackRoutes = require('./routes/feedback');
 const  adminRotes=require('./routes/adminRoutes');
+const razorpayWebhook=require('./routes/razorpayWebhook');
 
 const http = require("http");
 const { initializeSocket } = require("./routes/socketIo");
@@ -49,18 +50,13 @@ app.use(cors({
   credentials: true
 }));
 
+app.use("/api/paymentHook", razorpayWebhook);
 app.use(cookieParser());
 app.use(express.json());
 
 app.use(express.urlencoded({ extended: true }));
 
 const PORT = process.env.PORT || 8000;
-//console.log("FRONTEND_URL:", process.env.FRONTEND_URL);
-
-
-// Serve static frontend files
-//app.use(express.static(path.join(__dirname, '../Frontend/dist')));
-//console.log("URL",process.env.MONGO_URI);
 mongoose.connect(process.env.MONGO_URI || process.env.MONGO_LOCAL_URI )
     .then(() => console.log('MongoDB connected'))
     .catch(err => console.log(err));
@@ -68,17 +64,12 @@ mongoose.connect(process.env.MONGO_URI || process.env.MONGO_LOCAL_URI )
 app.use("/auth", authRoutes);
 app.use('/api', allRoutes);
 app.use('/booking', bookingRoutes);
-app.use('/api/payments', paymentRoutes);
+ app.use('/api/payments', paymentRoutes);
 app.use("/api/bids", biddingRoutes);
 app.use("/api/feedback", feedbackRoutes);
 app.use('/api/admin',adminRotes);
 
 app.use('/', userRoute);
-
-// app.get('*', (req, res) => {
-//     res.sendFile(path.join(__dirname, '../Frontend/dist', 'index.html'));
-// });
-
 
 
 server.listen(PORT,'0.0.0.0', () => console.log(`Server running on port ${PORT}`));

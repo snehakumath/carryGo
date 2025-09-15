@@ -57,8 +57,6 @@ const bookingSchema = new mongoose.Schema({
   transporter_email: {
     type:Schema.Types.ObjectId,
     ref:"User",
-    // type: String,
-    // match: [/.+@.+\..+/, "Please provide a valid email address"],
     default: null, // Initially, no email assigned
   },
   vehicle_id: { 

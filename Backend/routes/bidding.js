@@ -27,15 +27,15 @@ router.post("/place-bid", async (req, res) => {
       return res.status(400).json({ message: "You have already placed a bid." });
     }
 
-    const updatedOrder = await Booking.findOneAndUpdate(
-      { _id: booking_id },
-      { $set: { status: "Accepted", bid_status: "Bidding" } },
-      { new: true }
-    );
+//     const updatedOrder = await Booking.findOneAndUpdate(
+//       { _id: booking_id },
+// //{ $set: {status:"Bidding",bid_status: "Bidding" } },
+//       { new: true }
+//     );
 
-    if (!updatedOrder) {
-      return res.status(404).json({ message: "Order not found" });
-    }
+    // if (!updatedOrder) {
+    //   return res.status(404).json({ message: "Order not found" });
+    // }
 
     const newBid = new Bidding({
       booking_id,

@@ -140,6 +140,7 @@ const initializeSocket = (server) => {
 
 const sendNotificationToTransporters = async (message, orderId) => {
     try {
+        console.log("Hello from transporter notification!!!");
         if (!io) {
             console.error("⚠️ Socket.io is not initialized");
             return;

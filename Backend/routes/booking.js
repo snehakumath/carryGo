@@ -119,7 +119,7 @@ router.get("/goods", async (req, res) => {
     const goods = await Booking.find({}, "booking_id goods_type pickup_loc dropoff_loc email transporter_email status pickup_date bid_status is_shared vehicle_id")
     .populate('transporter_email', 'email')
     .populate("_id", "vehicle_type model_make capacity registration_number vehicle_id"); // Fetch relevant fields
-     console.log("goods details",goods);
+    // console.log("goods details",goods);
     res.json(goods);
   } catch (error) {
     res.status(500).json({ message: "Server error", error });
@@ -185,7 +185,6 @@ router.get("/goods", async (req, res) => {
 //     return res.status(500).json({ error: "Internal Server Error" });
 //   }
 // });
-
 router.get("/orders", async (req, res) => {
   try {
     const transporterEmail = req.query.transporterEmail;
@@ -193,46 +192,106 @@ router.get("/orders", async (req, res) => {
       return res.status(400).json({ error: "Transporter email required" });
     }
 
-    // ✅ Get transporter
     const transporter = await User.findOne({ email: transporterEmail }).lean();
     if (!transporter) {
       return res.status(404).json({ error: "Transporter not found" });
     }
-
     const transporterId = transporter._id;
+     console.log("Transporter Id", transporterId);
+    // 1️⃣ Get all "Bidding" bids by this transporter
+    const transporterBids = await Bidding.find({
+      transporter: transporterId,
+      status: "Bidding",
+    }).select("booking_id").lean();
+    console.log("TransporterBids",transporterBids);
+    const bidBookingIds = transporterBids.map(b => b.booking_id);
 
-    // 1️⃣ Available Orders → transporter not assigned yet
+    // 2️⃣ Available Orders → Booking.status = Pending and not already bid by transporter
     const availableOrders = await Booking.find({
       pickup_date: { $gte: new Date() },
-      transporter_email: null, // no transporter yet
+      status: "Pending",
+      _id: { $nin: bidBookingIds },
     }).lean();
+   console.log("Available Orders",availableOrders);
+    // 3️⃣ Placed Bids → transporter has bid but still "Bidding"
+    const placedBids = await Bidding.find({
+      transporter: transporterId,
+      status: "Bidding",
+    })
+      .populate("booking_id")
+      .lean();
+      console.log("placee bids",placedBids);
 
-    // 2️⃣ Placed Bids → transporter placed bid but still bidding
-    const placedBids = await Booking.find({
-      pickup_date: { $gte: new Date() },
-      transporter_email: transporterId,
-      bid_status: "Bidding",
-    }).lean();
+    // 4️⃣ Accepted Orders → transporter bid status is "Accepted"
+    const acceptedOrders = await Bidding.find({
+      transporter: transporterId,
+      status: "Accepted",
+    })
+      .populate("booking_id")
+      .lean();
 
-    // 3️⃣ Accepted Orders → customer accepted this transporter
-    const acceptedOrders = await Booking.find({
-      pickup_date: { $gte: new Date() },
-      transporter_email: transporterId,
-      bid_status: "Customer Accepted",
-     status: { $in: ["Accepted", "Assigned"] },
-    }).lean();
-
-    console.log("Result orders",acceptedOrders, availableOrders, placedBids);
     return res.json({
       availableOrders,
       placedBids,
       acceptedOrders,
     });
+
   } catch (error) {
     console.error("❌ Error in /orders:", error);
     return res.status(500).json({ error: "Internal Server Error" });
   }
 });
+
+
+
+// router.get("/orders", async (req, res) => {
+//   try {
+//     const transporterEmail = req.query.transporterEmail;
+//     if (!transporterEmail) {
+//       return res.status(400).json({ error: "Transporter email required" });
+//     }
+
+//     // ✅ Get transporter
+//     const transporter = await User.findOne({ email: transporterEmail }).lean();
+//     if (!transporter) {
+//       return res.status(404).json({ error: "Transporter not found" });
+//     }
+
+//     const transporterId = transporter._id;
+
+//     // 1️⃣ Available Orders → transporter not assigned yet
+//     const availableOrders = await Booking.find({
+//       pickup_date: { $gte: new Date() },
+//       transporter_email: null,
+     
+//     }).lean();
+
+//     // 2️⃣ Placed Bids → transporter placed bid but still bidding
+//     const placedBids = await Booking.find({
+//       pickup_date: { $gte: new Date() },
+//       transporter_email: transporterId,
+//       bid_status: "Bidding",
+//     }).lean();
+
+//     // 3️⃣ Accepted Orders → customer accepted this transporter
+//     const acceptedOrders = await Booking.find({
+//       pickup_date: { $gte: new Date() },
+//       transporter_email: transporterId,
+//       bid_status: "Customer Accepted",
+//      status: { $in: ["Accepted", "Assigned"] },
+//     }).lean();
+
+//     //console.log("Result orders",acceptedOrders, availableOrders, placedBids);
+//     return res.json({
+//       availableOrders,
+//       placedBids,
+//       acceptedOrders,
+//     });
+//   } catch (error) {
+//     console.error("❌ Error in /orders:", error);
+//     return res.status(500).json({ error: "Internal Server Error" });
+//   }
+// });
 
 
 //fetch transporter and vehicle detail for customer
@@ -582,44 +641,6 @@ router.put("/vehicles/make-available/:id", async (req, res) => {
 
 
 // ⏰ Cron Job - Automatically Free Up Trucks After Pickup Date
-// router.post("/complete-order", async (req, res) => {
-//   const { booking_id } = req.body;
-
-//   try {
-//     const booking = await Booking.findById(booking_id);
-//     if (!booking) {
-//       return res.status(404).json({ message: "Booking not found" });
-//     }
-//     // Update booking status and completion flag
-//     booking.status = "Completed";
-//     booking.order_completed = true;
-//     await booking.save();
-
-//     // Update vehicle availability
-//     if (booking.vehicle_id) {
-//       const vehicleObjectId = new mongoose.Types.ObjectId(booking.vehicle_id);
-   
-//     const updatedTruck = await Vehicle.findByIdAndUpdate(
-//       // booking.vehicle_id,
-//       vehicleObjectId,
-//       { availability_status: true },
-//       { new: true }
-//     );
-//   }
-//     if (!updatedTruck) {
-//       return res.status(404).json({ message: "Associated truck not found" });
-//     }
-
-//     res.status(200).json({
-//       message: "Order marked as completed and truck availability updated",
-//       booking,
-//       updatedTruck,
-//     });
-//   } catch (error) {
-//     console.error("Error completing order:", error);
-//     res.status(500).json({ message: "Server error completing order" });
-//   }
-// });
 router.post("/complete-order", async (req, res) => {
   const { booking_id } = req.body;
 

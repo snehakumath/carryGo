@@ -1,41 +1,39 @@
 import { useEffect, useRef, useState } from "react";
-import io from "socket.io-client";
+import { io } from "socket.io-client";
 import { toast } from "react-toastify";
+
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:8000";
 
 const Notification = () => {
   const [notifications, setNotifications] = useState([]);
   const seenNotificationIds = useRef(new Set());
-  const socketRef = useRef(null);
-  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:8000";
+
   useEffect(() => {
-    if (!socketRef.current) {
-      socketRef.current = io(BACKEND_URL);
-    }
+    // Create a new socket instance inside useEffect
+    const socket = io(BACKEND_URL);
 
-    const socket = socketRef.current;
-
+    // When connected, join transporter room
     socket.on("connect", () => {
-      console.log("Connected to server");
+      console.log("✅ Connected to server", socket.id);
+      socket.emit("joinTransporter");
+      console.log("🚚 Joined transporter room");
     });
 
-    socket.emit("joinTransporter");
-
-    socket.off("previousNotifications");
+    // Load previous notifications
     socket.on("previousNotifications", (data) => {
+      console.log("📜 Previous notifications:", data);
       const newOnes = data.filter((notif) => {
         if (seenNotificationIds.current.has(notif._id)) return false;
         seenNotificationIds.current.add(notif._id);
         return true;
       });
-
       setNotifications((prev) => [...prev, ...newOnes]);
     });
 
-    socket.off("newNotification");
+    // Listen for new notifications
     socket.on("newNotification", (data) => {
-      console.log('Received new notifications:', data);
+      console.log("🔔 New notification received:", data);
       const newData = Array.isArray(data) ? data : [data];
-
       const newOnes = newData.filter((notif) => {
         if (seenNotificationIds.current.has(notif._id)) return false;
         seenNotificationIds.current.add(notif._id);
@@ -48,6 +46,7 @@ const Notification = () => {
       }
     });
 
+    // Cleanup on unmount
     return () => {
       socket.disconnect();
     };
@@ -57,17 +56,82 @@ const Notification = () => {
     <div className="mt-10">
       <h2 className="text-xl text-white font-semibold mb-4">Notifications</h2>
       <ul>
-        {notifications.map((notification) => (
-          <li key={notification._id} className="text-white">{notification.message}</li>
-        ))}
-      </ul>
+  {notifications.map((notification) => (
+    <li key={String(notification._id)} className="text-white">
+      {notification.message}
+    </li>
+  ))}
+</ul>
     </div>
   );
 };
 
 export default Notification;
 
+// const Notification = () => {
+//   const [notifications, setNotifications] = useState([]);
+//   const seenNotificationIds = useRef(new Set());
+//   const socketRef = useRef(null);
+//   const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:8000";
+//   useEffect(() => {
+//     if (!socketRef.current) {
+//       socketRef.current = io(BACKEND_URL);
+//     }
 
+//     const socket = socketRef.current;
+
+//     socket.on("connect", () => {
+//       console.log("Connected to server");
+//     });
+
+//     socket.emit("joinTransporter");
+
+//     socket.off("previousNotifications");
+//     socket.on("previousNotifications", (data) => {
+//       const newOnes = data.filter((notif) => {
+//         if (seenNotificationIds.current.has(notif._id)) return false;
+//         seenNotificationIds.current.add(notif._id);
+//         return true;
+//       });
+
+//       setNotifications((prev) => [...prev, ...newOnes]);
+//     });
+
+//     socket.off("newNotification");
+//     socket.on("newNotification", (data) => {
+//       console.log('Received new notifications:', data);
+//       const newData = Array.isArray(data) ? data : [data];
+
+//       const newOnes = newData.filter((notif) => {
+//         if (seenNotificationIds.current.has(notif._id)) return false;
+//         seenNotificationIds.current.add(notif._id);
+//         return true;
+//       });
+
+//       if (newOnes.length > 0) {
+//         setNotifications((prev) => [...newOnes, ...prev]);
+//         toast.info("New notification received!");
+//       }
+//     });
+
+//     return () => {
+//       socket.disconnect();
+//     };
+//   }, []);
+
+//   return (
+//     <div className="mt-10">
+//       <h2 className="text-xl text-white font-semibold mb-4">Notifications</h2>
+//       <ul>
+//         {notifications.map((notification) => (
+//           <li key={notification._id} className="text-white">{notification.message}</li>
+//         ))}
+//       </ul>
+//     </div>
+//   );
+// };
+
+// export default Notification;
 
 // import React, { useEffect, useState } from "react";
 // import { io } from "socket.io-client";
